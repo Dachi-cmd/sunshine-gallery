@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import portrait from "@/assets/portrait.jpg";
-
+import studio1 from "@/assets/studio-1.jpg";
+import studio2 from "@/assets/studio-2.jpg";
+import studio3 from "@/assets/studio-3.jpg";
+import studio4 from "@/assets/studio-4.jpg";
+import studioVideo from "@/assets/studio-video.mp4.asset.json";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/about")({
@@ -15,8 +20,17 @@ export const Route = createFileRoute("/about")({
   component: About,
 });
 
+const slides = [studio1, studio2, studio3, studio4];
+
 function About() {
   const { t, lang } = useI18n();
+  const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setSlide((s) => (s + 1) % slides.length), 4000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <section className="mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 py-20 md:grid-cols-2 md:py-28">
       <div className="aspect-[4/5] overflow-hidden bg-muted">
@@ -109,6 +123,60 @@ function About() {
             );
           })}
         </ul>
+      </div>
+
+      <div className="md:col-span-2">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+          {lang === "en" ? "Studio" : "სტუდია"}
+        </p>
+        <h2 className="serif mt-4 text-3xl md:text-4xl">
+          {lang === "en" ? "Inside the Studio" : "სტუდიის შიგნით"}
+        </h2>
+
+        <div className="relative mt-8 aspect-[16/9] overflow-hidden bg-muted">
+          {slides.map((src, i) => (
+            <img
+              key={src}
+              src={src}
+              alt=""
+              loading="lazy"
+              width={1280}
+              height={800}
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000"
+              style={{ opacity: slide === i ? 1 : 0 }}
+            />
+          ))}
+          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setSlide(i)}
+                aria-label={`Slide ${i + 1}`}
+                className="h-1.5 w-8 bg-white/40 transition-colors hover:bg-white/70"
+                style={{ backgroundColor: slide === i ? "rgba(255,255,255,0.95)" : undefined }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="md:col-span-2">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+          {lang === "en" ? "Video" : "ვიდეო"}
+        </p>
+        <h2 className="serif mt-4 text-3xl md:text-4xl">
+          {lang === "en" ? "A Visit to the Studio" : "ვიზიტი სტუდიაში"}
+        </h2>
+        <div className="mt-8 aspect-video overflow-hidden bg-black">
+          <video
+            src={studioVideo.url}
+            controls
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-cover"
+          />
+        </div>
       </div>
     </section>
   );
