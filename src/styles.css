@@ -141,3 +141,113 @@
     background: currentColor;
   }
 }
+
+/* ===== Realistic gallery wall ===== */
+.gallery-wall {
+  position: relative;
+  padding: 3.5rem 1.5rem 5rem;
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in oklab, var(--color-foreground) 6%, transparent), transparent 60%),
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--color-background) 96%, var(--color-foreground) 4%) 0%,
+      color-mix(in oklab, var(--color-background) 90%, var(--color-foreground) 10%) 100%);
+  border-top: 1px solid color-mix(in oklab, var(--color-foreground) 8%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--color-foreground) 8%, transparent);
+  box-shadow: inset 0 30px 60px -30px color-mix(in oklab, var(--color-foreground) 18%, transparent);
+  overflow: hidden;
+}
+.gallery-wall__lighting {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 40% at 50% -10%,
+    color-mix(in oklab, #fff7e6 30%, transparent), transparent 70%);
+  pointer-events: none;
+}
+.gallery-wall__floor {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 40px;
+  background: linear-gradient(180deg, transparent,
+    color-mix(in oklab, var(--color-foreground) 14%, transparent));
+  pointer-events: none;
+}
+.gallery-wall__grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 180px;
+  gap: 2rem 1.75rem;
+  align-items: end;
+}
+@media (min-width: 768px) {
+  .gallery-wall__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 200px;
+    gap: 2.5rem 2rem;
+  }
+}
+@media (min-width: 1100px) {
+  .gallery-wall__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 220px;
+  }
+}
+.frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  transition: transform 0.4s ease;
+}
+.frame:hover { transform: translateY(-3px); }
+.frame::before {
+  content: "";
+  position: absolute;
+  top: -10px; left: 50%;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--color-foreground) 50%, transparent);
+  transform: translateX(-50%);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.3);
+}
+.frame__matte {
+  width: 100%;
+  flex: 1;
+  background: linear-gradient(145deg, #2a201a, #100a06);
+  padding: 10px;
+  box-shadow:
+    0 1px 0 color-mix(in oklab, #fff 20%, transparent) inset,
+    0 -1px 0 rgba(0,0,0,0.5) inset,
+    0 18px 30px -15px rgba(0,0,0,0.55),
+    0 6px 10px -6px rgba(0,0,0,0.4);
+  border-radius: 2px;
+}
+.frame__art {
+  width: 100%;
+  height: 100%;
+  background: #f4ede1;
+  padding: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
+}
+.frame__plaque {
+  margin-top: 10px;
+  padding: 4px 8px;
+  max-width: 90%;
+}
+.dark .frame__matte {
+  background: linear-gradient(145deg, #1a120c, #050302);
+  box-shadow:
+    0 1px 0 color-mix(in oklab, #fff 10%, transparent) inset,
+    0 -1px 0 rgba(0,0,0,0.7) inset,
+    0 18px 35px -15px rgba(0,0,0,0.8),
+    0 6px 10px -6px rgba(0,0,0,0.6);
+}
+.dark .gallery-wall {
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in oklab, #fff 4%, transparent), transparent 60%),
+    linear-gradient(180deg, #1a1612 0%, #0e0b08 100%);
+}
