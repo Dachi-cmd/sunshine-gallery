@@ -1,4 +1,12 @@
+import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+
+const socials = [
+  { href: "https://instagram.com/", label: "Instagram", Icon: Instagram },
+  { href: "https://youtube.com/", label: "YouTube", Icon: Youtube },
+  { href: "https://facebook.com/", label: "Facebook", Icon: Facebook },
+  { href: "https://linkedin.com/", label: "LinkedIn", Icon: Linkedin },
+];
 
 export function SiteFooter() {
   const { t } = useI18n();
@@ -10,6 +18,20 @@ export function SiteFooter() {
           <p className="mt-1 text-xs uppercase tracking-[0.25em] text-muted-foreground">
             Painter · Tbilisi
           </p>
+          <div className="mt-4 flex gap-4">
+            {socials.map(({ href, label, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="text-muted-foreground transition hover:text-accent"
+              >
+                <Icon size={18} />
+              </a>
+            ))}
+          </div>
         </div>
         <div className="text-sm">
           <p className="mb-2 text-xs uppercase tracking-[0.25em] text-muted-foreground">
