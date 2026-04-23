@@ -66,6 +66,31 @@ function About() {
           </div>
         )}
       </div>
+      <div className="md:col-span-2">
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+          {lang === "en" ? "Exhibition" : "გამოფენა"}
+        </p>
+        <h2 className="serif mt-4 text-3xl md:text-4xl">
+          {lang === "en" ? "Art New York — Group Exhibition" : "Art New York — ჯგუფური გამოფენა"}
+        </h2>
+        <div className="mt-8 overflow-hidden bg-muted">
+          <img
+            src={exhibition}
+            alt={
+              lang === "en"
+                ? "Davit Abramishvili at the Art New York group exhibition"
+                : "დავით აბრამიშვილი Art New York-ის ჯგუფურ გამოფენაზე"
+            }
+            className="h-auto w-full object-cover"
+            loading="lazy"
+          />
+        </div>
+        <p className="mt-8 max-w-3xl text-base leading-relaxed text-foreground/90">
+          {lang === "en"
+            ? "Davit Abramishvili's work stands apart for its raw intensity and philosophical depth. Each canvas becomes a field of tension — a dialogue between silence and revelation, memory and absence. His presence in the group exhibition affirmed not only his unique voice, but also his ability to transform painting into a profound existential statement."
+            : "დავით აბრამიშვილის ნამუშევრები გამოირჩევა ნედლი ინტენსივობითა და ფილოსოფიური სიღრმით. თითოეული ტილო იქცევა დაძაბულობის ველად — დიალოგად სიჩუმესა და გამოცხადებას, მეხსიერებასა და არყოფნას შორის. მისი მონაწილეობა ჯგუფურ გამოფენაში დაადასტურა არა მხოლოდ მისი უნიკალური ხმა, არამედ უნარი, ფერწერა აქციოს ღრმა ეგზისტენციალურ გამონათქვამად."}
+        </p>
+      </div>
     </section>
   );
 }
