@@ -20,8 +20,17 @@ export const Route = createFileRoute("/about")({
   component: About,
 });
 
+const slides = [studio1, studio2, studio3, studio4];
+
 function About() {
   const { t, lang } = useI18n();
+  const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setSlide((s) => (s + 1) % slides.length), 4000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <section className="mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 py-20 md:grid-cols-2 md:py-28">
       <div className="aspect-[4/5] overflow-hidden bg-muted">
