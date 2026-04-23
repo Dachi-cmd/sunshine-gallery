@@ -122,6 +122,7 @@ function About() {
               </li>
             );
           })}
+        </ul>
       </div>
 
       <div className="md:col-span-2">
