@@ -68,28 +68,47 @@ function About() {
       </div>
       <div className="md:col-span-2">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          {lang === "en" ? "Exhibition" : "გამოფენა"}
+          {lang === "en" ? "Exhibitions" : "გამოფენები"}
         </p>
         <h2 className="serif mt-4 text-3xl md:text-4xl">
-          {lang === "en" ? "Art New York — Group Exhibition" : "Art New York — ჯგუფური გამოფენა"}
+          {lang === "en" ? "Selected Exhibitions" : "რჩეული გამოფენები"}
         </h2>
-        <div className="mt-8 overflow-hidden bg-muted">
-          <img
-            src={exhibition}
-            alt={
-              lang === "en"
-                ? "Davit Abramishvili at the Art New York group exhibition"
-                : "დავით აბრამიშვილი Art New York-ის ჯგუფურ გამოფენაზე"
-            }
-            className="h-auto w-full object-cover"
-            loading="lazy"
-          />
-        </div>
-        <p className="mt-8 max-w-3xl text-base leading-relaxed text-foreground/90">
-          {lang === "en"
-            ? "Davit Abramishvili's work stands apart for its raw intensity and philosophical depth. Each canvas becomes a field of tension — a dialogue between silence and revelation, memory and absence. His presence in the group exhibition affirmed not only his unique voice, but also his ability to transform painting into a profound existential statement."
-            : "დავით აბრამიშვილის ნამუშევრები გამოირჩევა ნედლი ინტენსივობითა და ფილოსოფიური სიღრმით. თითოეული ტილო იქცევა დაძაბულობის ველად — დიალოგად სიჩუმესა და გამოცხადებას, მეხსიერებასა და არყოფნას შორის. მისი მონაწილეობა ჯგუფურ გამოფენაში დაადასტურა არა მხოლოდ მისი უნიკალური ხმა, არამედ უნარი, ფერწერა აქციოს ღრმა ეგზისტენციალურ გამონათქვამად."}
-        </p>
+        <ul className="mt-10 divide-y divide-border border-y border-border">
+          {[
+            {
+              year: "2024",
+              en: { title: "Art New York — Group Exhibition", venue: "New York, USA" },
+              ka: { title: "Art New York — ჯგუფური გამოფენა", venue: "ნიუ-იორკი, აშშ" },
+            },
+            {
+              year: "2023",
+              en: { title: "Solo Show — Studio Practice", venue: "Tbilisi, Georgia" },
+              ka: { title: "სოლო გამოფენა — სტუდიური პრაქტიკა", venue: "თბილისი, საქართველო" },
+            },
+            {
+              year: "2022",
+              en: { title: "Caucasus Contemporary", venue: "Berlin, Germany" },
+              ka: { title: "კავკასიის თანამედროვე ხელოვნება", venue: "ბერლინი, გერმანია" },
+            },
+            {
+              year: "2021",
+              en: { title: "Quiet Figuration — Group Show", venue: "Tbilisi, Georgia" },
+              ka: { title: "მშვიდი ფიგურატივი — ჯგუფური გამოფენა", venue: "თბილისი, საქართველო" },
+            },
+          ].map((ex) => {
+            const loc = lang === "en" ? ex.en : ex.ka;
+            return (
+              <li
+                key={ex.year + loc.title}
+                className="grid grid-cols-[80px_1fr] gap-6 py-5 md:grid-cols-[100px_1fr_auto]"
+              >
+                <span className="serif text-lg text-muted-foreground">{ex.year}</span>
+                <span className="text-base text-foreground">{loc.title}</span>
+                <span className="text-sm text-muted-foreground md:text-right">{loc.venue}</span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );
