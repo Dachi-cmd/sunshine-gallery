@@ -175,41 +175,32 @@ function GalleryPage() {
         <div className="gallery-wall">
           <div className="gallery-wall__lighting" aria-hidden />
           <div className="gallery-wall__grid">
-            {filtered.map((art, i) => {
-              // Vary frame sizes for a curated wall feel
-              const sizeClass =
-                i % 7 === 0
-                  ? "row-span-2"
-                  : i % 5 === 0
-                    ? "row-span-2"
-                    : "";
-              return (
-                <button
-                  key={art.id}
-                  type="button"
-                  onClick={() => setLightbox(i)}
-                  className={`group frame ${sizeClass}`}
-                  aria-label={pickLocalized(art, "title", lang)}
-                >
-                  <div className="frame__matte">
-                    <div className="frame__art">
-                      <img
-                        src={resolveImage(art.image_url)}
-                        alt={pickLocalized(art, "title", lang)}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
-                      />
-                    </div>
+            {filtered.map((art, i) => (
+              <button
+                key={art.id}
+                type="button"
+                onClick={() => setLightbox(i)}
+                className="group frame"
+                aria-label={pickLocalized(art, "title", lang)}
+              >
+                <div className="frame__matte">
+                  <div className="frame__art">
+                    <img
+                      src={resolveImage(art.image_url)}
+                      alt={pickLocalized(art, "title", lang)}
+                      loading="lazy"
+                      className="transition duration-700 group-hover:scale-[1.03]"
+                    />
                   </div>
-                  <div className="frame__plaque">
-                    <p className="serif text-sm leading-tight">{pickLocalized(art, "title", lang)}</p>
-                    <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                      {[art.medium, art.year].filter(Boolean).join(" · ")}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
+                </div>
+                <div className="frame__plaque">
+                  <p className="serif text-sm leading-tight">{pickLocalized(art, "title", lang)}</p>
+                  <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {[art.medium, art.year].filter(Boolean).join(" · ")}
+                  </p>
+                </div>
+              </button>
+            ))}
           </div>
           <div className="gallery-wall__floor" aria-hidden />
         </div>
