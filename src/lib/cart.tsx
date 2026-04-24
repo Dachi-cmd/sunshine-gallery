@@ -110,7 +110,7 @@ export function useCart() {
   return c;
 }
 
-export const WHATSAPP_NUMBER = "599597009391"; // +599 597 009 391
+export const WHATSAPP_NUMBER = "995597009391"; // +995 597 00 93 91 (Georgia)
 
 export function buildWhatsappLink(message: string) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;

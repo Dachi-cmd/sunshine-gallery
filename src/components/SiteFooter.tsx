@@ -38,8 +38,8 @@ export function SiteFooter() {
             {t("footer.contact")}
           </p>
           <p>
-            <a href="tel:+599597009391" className="hover:text-accent transition">
-              +599 597 009 391
+            <a href="tel:+995597009391" className="hover:text-accent transition">
+              597 00 93 91
             </a>
           </p>
           <p>

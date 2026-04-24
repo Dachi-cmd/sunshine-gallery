@@ -275,7 +275,7 @@ function GalleryPage() {
                   }}
                   className="inline-flex items-center gap-2 bg-white px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-black transition hover:bg-white/90"
                 >
-                  <ShoppingBag size={13} /> Add to Cart
+                  <ShoppingBag size={13} /> {t("cart.add")}
                 </button>
                 <a
                   href={buildWhatsappLink(
@@ -286,7 +286,7 @@ function GalleryPage() {
                   onClick={(e) => e.stopPropagation()}
                   className="inline-flex items-center gap-2 border border-white/40 px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-white transition hover:bg-white/10"
                 >
-                  <MessageCircle size={13} /> Inquire on WhatsApp
+                  <MessageCircle size={13} /> {t("cart.inquire")}
                 </a>
               </div>
               <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-white/40">
