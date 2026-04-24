@@ -18,20 +18,20 @@ export const Route = createFileRoute("/cart")({
 function CartPage() {
   const { user, loading } = useAuth();
   const { items, removeFromCart, clearCart } = useCart();
-  const { lang } = useI18n();
+  const { lang, t } = useI18n();
 
   if (loading) return <div className="py-32 text-center text-muted-foreground">…</div>;
 
   if (!user) {
     return (
       <section className="mx-auto max-w-md px-6 py-24 text-center">
-        <h1 className="serif text-4xl">Your Cart</h1>
-        <p className="mt-4 text-sm text-muted-foreground">Sign in to view your cart.</p>
+        <h1 className="serif text-4xl">{t("cart.title")}</h1>
+        <p className="mt-4 text-sm text-muted-foreground">{t("cart.signInPrompt")}</p>
         <Link
           to="/auth"
           className="mt-8 inline-block border-b border-foreground pb-1 text-xs uppercase tracking-[0.25em]"
         >
-          Sign In →
+          {t("auth.signIn")} →
         </Link>
       </section>
     );
@@ -47,21 +47,21 @@ function CartPage() {
   return (
     <section className="mx-auto max-w-4xl px-6 py-12 md:py-20">
       <header className="mb-10">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Cart</p>
-        <h1 className="serif mt-2 text-4xl md:text-5xl">Your Selections</h1>
+        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{t("cart.label")}</p>
+        <h1 className="serif mt-2 text-4xl md:text-5xl">{t("cart.title")}</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          {items.length} {items.length === 1 ? "item" : "items"}
+          {items.length} {items.length === 1 ? t("cart.item") : t("cart.items")}
         </p>
       </header>
 
       {items.length === 0 ? (
         <div className="py-24 text-center">
-          <p className="text-muted-foreground">Your cart is empty.</p>
+          <p className="text-muted-foreground">{t("cart.empty")}</p>
           <Link
             to="/gallery"
             className="mt-6 inline-block border-b border-foreground pb-1 text-xs uppercase tracking-[0.25em]"
           >
-            Browse Gallery →
+            {t("cart.browse")}
           </Link>
         </div>
       ) : (
@@ -100,7 +100,7 @@ function CartPage() {
               onClick={clearCart}
               className="text-xs uppercase tracking-[0.25em] text-muted-foreground hover:text-foreground"
             >
-              Clear cart
+              {t("cart.clear")}
             </button>
             <a
               href={buildWhatsappLink(checkoutMessage())}
@@ -108,7 +108,7 @@ function CartPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 bg-foreground px-6 py-3 text-xs uppercase tracking-[0.25em] text-background transition hover:bg-accent"
             >
-              <MessageCircle size={14} /> Checkout via WhatsApp
+              <MessageCircle size={14} /> {t("cart.checkout")}
             </a>
           </div>
         </>
