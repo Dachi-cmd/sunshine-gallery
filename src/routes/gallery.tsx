@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState, useEffect } from "react";
-import { Search, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, X, ChevronLeft, ChevronRight, ShoppingBag, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
+import { useCart, buildWhatsappLink } from "@/lib/cart";
 
 export const Route = createFileRoute("/gallery")({
   head: () => ({
@@ -31,6 +32,7 @@ type Artwork = {
 
 function GalleryPage() {
   const { lang, t } = useI18n();
+  const { addToCart } = useCart();
   const [query, setQuery] = useState("");
   const [medium, setMedium] = useState<string>("");
   const [year, setYear] = useState<string>("");
@@ -264,7 +266,30 @@ function GalleryPage() {
                   {pickLocalized(filtered[lightbox], "description", lang)}
                 </p>
               )}
-              <p className="mt-2 text-[10px] uppercase tracking-[0.3em] text-white/40">
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void addToCart(filtered[lightbox].id);
+                  }}
+                  className="inline-flex items-center gap-2 bg-white px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-black transition hover:bg-white/90"
+                >
+                  <ShoppingBag size={13} /> Add to Cart
+                </button>
+                <a
+                  href={buildWhatsappLink(
+                    `Hi! I'm interested in "${pickLocalized(filtered[lightbox], "title", lang)}"${filtered[lightbox].year ? ` (${filtered[lightbox].year})` : ""}.`,
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-2 border border-white/40 px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-white transition hover:bg-white/10"
+                >
+                  <MessageCircle size={13} /> Inquire on WhatsApp
+                </a>
+              </div>
+              <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-white/40">
                 {lightbox + 1} / {filtered.length}
               </p>
             </figcaption>
