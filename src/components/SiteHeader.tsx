@@ -1,13 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, ShoppingBag, User, LogOut } from "lucide-react";
 import { useTheme } from "@/lib/theme";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
 
 export function SiteHeader() {
   const { theme, toggle } = useTheme();
   const { lang, setLang, t } = useI18n();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user, signOut } = useAuth();
+  const { count } = useCart();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
@@ -26,6 +28,38 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <Link
+            to="/cart"
+            aria-label="Cart"
+            className="relative grid h-9 w-9 place-items-center rounded-full border border-border transition hover:bg-secondary"
+          >
+            <ShoppingBag size={15} />
+            {count > 0 && (
+              <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-foreground px-1 text-[9px] font-medium text-background">
+                {count}
+              </span>
+            )}
+          </Link>
+
+          {user ? (
+            <button
+              type="button"
+              onClick={() => void signOut()}
+              aria-label="Sign out"
+              className="grid h-9 w-9 place-items-center rounded-full border border-border transition hover:bg-secondary"
+            >
+              <LogOut size={15} />
+            </button>
+          ) : (
+            <Link
+              to="/auth"
+              aria-label="Sign in"
+              className="grid h-9 w-9 place-items-center rounded-full border border-border transition hover:bg-secondary"
+            >
+              <User size={15} />
+            </Link>
+          )}
+
           <button
             type="button"
             onClick={toggle}
