@@ -27,6 +27,7 @@ import g22 from "@/assets/gallery-22.jpg";
 import g23 from "@/assets/gallery-23.jpg";
 import g24 from "@/assets/gallery-24.jpg";
 import g25 from "@/assets/gallery-25.jpg";
+import g26 from "@/assets/gallery-26.jpg";
 
 const map: Record<string, string> = {
   "/src-asset/sample-1.jpg": s1,
@@ -56,6 +57,7 @@ const map: Record<string, string> = {
   "/src-asset/gallery-23.jpg": g23,
   "/src-asset/gallery-24.jpg": g24,
   "/src-asset/gallery-25.jpg": g25,
+  "/src-asset/gallery-26.jpg": g26,
 };
 
 export function resolveImage(url: string): string {
