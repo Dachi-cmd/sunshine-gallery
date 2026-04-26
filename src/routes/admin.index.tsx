@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { resolveImage } from "@/lib/assetMap";
 import { SETTINGS_DEFAULTS, type SiteSettings } from "@/lib/siteSettings";
+import { ABOUT_DEFAULTS, type AboutSettings, type Exhibition } from "@/lib/aboutSettings";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/admin/")({
   component: AdminPage,
 });
 
-type TabKey = "artworks" | "products" | "settings" | "analytics";
+type TabKey = "artworks" | "products" | "about" | "settings" | "analytics";
 
 function AdminPage() {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -68,7 +69,7 @@ function AdminPage() {
       </header>
 
       <div className="mb-8 flex gap-6 border-b border-border">
-        {(["artworks", "products", "settings", "analytics"] as const).map((k) => (
+        {(["artworks", "products", "about", "settings", "analytics"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
@@ -83,6 +84,7 @@ function AdminPage() {
 
       {tab === "artworks" && <ArtworksAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "products" && <ProductsAdmin onChange={() => qc.invalidateQueries()} />}
+      {tab === "about" && <AboutAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "settings" && <SettingsAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "analytics" && <AnalyticsAdmin />}
 
@@ -732,5 +734,277 @@ function Stat({ label, value }: { label: string; value: number }) {
       <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">{label}</div>
       <div className="serif text-3xl mt-2">{value}</div>
     </div>
+  );
+}
+
+async function uploadToArtworks(file: File): Promise<string> {
+  const ext = file.name.split(".").pop() || "bin";
+  const name = `about/${crypto.randomUUID()}.${ext}`;
+  const { error } = await supabase.storage.from("artworks").upload(name, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type || undefined,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from("artworks").getPublicUrl(name);
+  return data.publicUrl;
+}
+
+function AboutAdmin({ onChange }: { onChange: () => void }) {
+  const { data, refetch } = useQuery({
+    queryKey: ["admin-about-settings"],
+    queryFn: async (): Promise<AboutSettings> => {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("key,value")
+        .in("key", ["about_portrait_url", "about_video_url", "about_studio_images", "about_exhibitions"]);
+      if (error) throw error;
+      const map: Record<string, string | null> = {};
+      for (const r of data ?? []) map[r.key] = r.value;
+      const parse = <T,>(v: string | null | undefined, fb: T): T => {
+        if (!v) return fb;
+        try { return JSON.parse(v) as T; } catch { return fb; }
+      };
+      return {
+        about_portrait_url: map.about_portrait_url || ABOUT_DEFAULTS.about_portrait_url,
+        about_video_url: map.about_video_url || ABOUT_DEFAULTS.about_video_url,
+        about_studio_images: parse<string[]>(map.about_studio_images, ABOUT_DEFAULTS.about_studio_images),
+        about_exhibitions: parse<Exhibition[]>(map.about_exhibitions, ABOUT_DEFAULTS.about_exhibitions),
+      };
+    },
+  });
+
+  const [form, setForm] = useState<AboutSettings | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (data && !form) setForm(data);
+  }, [data, form]);
+
+  if (!form) return <div className="text-muted-foreground">…</div>;
+
+  const persist = async (next: AboutSettings) => {
+    setForm(next);
+    const rows = [
+      { key: "about_portrait_url", value: next.about_portrait_url },
+      { key: "about_video_url", value: next.about_video_url },
+      { key: "about_studio_images", value: JSON.stringify(next.about_studio_images) },
+      { key: "about_exhibitions", value: JSON.stringify(next.about_exhibitions) },
+    ];
+    const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
+    if (error) toast.error(error.message);
+  };
+
+  const saveAll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    await persist(form);
+    setBusy(false);
+    toast.success("About page saved");
+    void refetch();
+    onChange();
+  };
+
+  const handlePortraitUpload = async (file: File) => {
+    setUploading("portrait");
+    try {
+      const url = await uploadToArtworks(file);
+      const next = { ...form, about_portrait_url: url };
+      await persist(next);
+      toast.success("Portrait updated");
+      void refetch();
+      onChange();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const handleVideoUpload = async (file: File) => {
+    setUploading("video");
+    try {
+      const url = await uploadToArtworks(file);
+      const next = { ...form, about_video_url: url };
+      await persist(next);
+      toast.success("Video updated");
+      void refetch();
+      onChange();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const addStudioImage = async (file: File) => {
+    setUploading("studio");
+    try {
+      const url = await uploadToArtworks(file);
+      const next = { ...form, about_studio_images: [...form.about_studio_images, url] };
+      await persist(next);
+      toast.success("Image added");
+      void refetch();
+      onChange();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(null);
+    }
+  };
+
+  const removeStudioImage = async (idx: number) => {
+    const next = { ...form, about_studio_images: form.about_studio_images.filter((_, i) => i !== idx) };
+    await persist(next);
+    void refetch();
+    onChange();
+  };
+
+  const updateExhibition = (idx: number, field: "year" | "en.title" | "en.venue" | "ka.title" | "ka.venue", value: string) => {
+    const list = form.about_exhibitions.map((ex, i) => {
+      if (i !== idx) return ex;
+      if (field === "year") return { ...ex, year: value };
+      if (field === "en.title") return { ...ex, en: { ...ex.en, title: value } };
+      if (field === "en.venue") return { ...ex, en: { ...ex.en, venue: value } };
+      if (field === "ka.title") return { ...ex, ka: { ...ex.ka, title: value } };
+      return { ...ex, ka: { ...ex.ka, venue: value } };
+    });
+    setForm({ ...form, about_exhibitions: list });
+  };
+
+  const addExhibition = () => {
+    setForm({
+      ...form,
+      about_exhibitions: [
+        ...form.about_exhibitions,
+        { year: "", en: { title: "", venue: "" }, ka: { title: "", venue: "" } },
+      ],
+    });
+  };
+
+  const removeExhibition = (idx: number) => {
+    setForm({ ...form, about_exhibitions: form.about_exhibitions.filter((_, i) => i !== idx) });
+  };
+
+  return (
+    <form onSubmit={saveAll} className="space-y-12">
+      <section className="space-y-4 rounded border border-border bg-surface p-6">
+        <h2 className="serif text-xl">Portrait image</h2>
+        <p className="text-xs text-muted-foreground">Shown at the top of the About page.</p>
+        <div className="flex gap-6">
+          {form.about_portrait_url ? (
+            <img src={form.about_portrait_url} alt="" className="h-40 w-32 object-cover bg-muted" />
+          ) : (
+            <div className="h-40 w-32 bg-muted flex items-center justify-center text-xs text-muted-foreground">Default</div>
+          )}
+          <div className="flex-1 space-y-3">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handlePortraitUpload(f); }}
+              className="block w-full text-sm"
+            />
+            {uploading === "portrait" && <p className="text-xs text-muted-foreground">Uploading…</p>}
+            {form.about_portrait_url && (
+              <button type="button" onClick={() => void persist({ ...form, about_portrait_url: "" })} className="text-[11px] uppercase tracking-[0.2em] text-destructive">
+                Reset to default
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded border border-border bg-surface p-6">
+        <h2 className="serif text-xl">Studio video</h2>
+        <p className="text-xs text-muted-foreground">MP4 file. Replaces the studio video at the bottom of About.</p>
+        <div className="flex gap-6">
+          {form.about_video_url ? (
+            <video src={form.about_video_url} className="h-40 w-64 object-cover bg-black" muted playsInline />
+          ) : (
+            <div className="h-40 w-64 bg-muted flex items-center justify-center text-xs text-muted-foreground">Default</div>
+          )}
+          <div className="flex-1 space-y-3">
+            <input
+              type="file"
+              accept="video/*"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleVideoUpload(f); }}
+              className="block w-full text-sm"
+            />
+            {uploading === "video" && <p className="text-xs text-muted-foreground">Uploading… (large files may take a while)</p>}
+            {form.about_video_url && (
+              <button type="button" onClick={() => void persist({ ...form, about_video_url: "" })} className="text-[11px] uppercase tracking-[0.2em] text-destructive">
+                Reset to default
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded border border-border bg-surface p-6">
+        <h2 className="serif text-xl">Studio slideshow</h2>
+        <p className="text-xs text-muted-foreground">Add images to override the default studio gallery. Leave empty to use defaults.</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {form.about_studio_images.map((url, i) => (
+            <div key={url + i} className="relative group">
+              <img src={url} alt="" className="aspect-[16/10] w-full object-cover bg-muted" />
+              <button
+                type="button"
+                onClick={() => void removeStudioImage(i)}
+                className="absolute top-1 right-1 bg-background/80 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-destructive opacity-0 group-hover:opacity-100"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) { void addStudioImage(f); e.target.value = ""; } }}
+          className="block w-full text-sm"
+        />
+        {uploading === "studio" && <p className="text-xs text-muted-foreground">Uploading…</p>}
+      </section>
+
+      <section className="space-y-4 rounded border border-border bg-surface p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="serif text-xl">Exhibitions</h2>
+          <button type="button" onClick={addExhibition} className="text-xs uppercase tracking-[0.25em] hover:text-accent">
+            + Add exhibition
+          </button>
+        </div>
+        <div className="space-y-4">
+          {form.about_exhibitions.map((ex, i) => (
+            <div key={i} className="grid gap-3 rounded border border-border p-4 md:grid-cols-[100px_1fr_1fr_auto]">
+              <Input label="Year" value={ex.year} onChange={(v) => updateExhibition(i, "year", v)} />
+              <div className="space-y-2">
+                <Input label="Title (EN)" value={ex.en.title} onChange={(v) => updateExhibition(i, "en.title", v)} />
+                <Input label="Venue (EN)" value={ex.en.venue} onChange={(v) => updateExhibition(i, "en.venue", v)} />
+              </div>
+              <div className="space-y-2">
+                <Input label="Title (KA)" value={ex.ka.title} onChange={(v) => updateExhibition(i, "ka.title", v)} />
+                <Input label="Venue (KA)" value={ex.ka.venue} onChange={(v) => updateExhibition(i, "ka.venue", v)} />
+              </div>
+              <button
+                type="button"
+                onClick={() => removeExhibition(i)}
+                className="text-[11px] uppercase tracking-[0.2em] text-destructive self-start"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <button
+        type="submit"
+        disabled={busy}
+        className="border-b border-foreground pb-1 text-xs uppercase tracking-[0.25em] hover:text-accent hover:border-accent disabled:opacity-50"
+      >
+        {busy ? "Saving…" : "Save About page →"}
+      </button>
+    </form>
   );
 }

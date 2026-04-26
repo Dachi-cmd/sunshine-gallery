@@ -7,6 +7,7 @@ import studio3 from "@/assets/studio-3.jpg";
 import studio4 from "@/assets/studio-4.jpg";
 import studioVideo from "@/assets/studio-video.mp4.asset.json";
 import { useI18n } from "@/lib/i18n";
+import { useAboutSettings } from "@/lib/aboutSettings";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -20,22 +21,29 @@ export const Route = createFileRoute("/about")({
   component: About,
 });
 
-const slides = [studio1, studio2, studio3, studio4];
+const defaultStudio = [studio1, studio2, studio3, studio4];
 
 function About() {
   const { t, lang } = useI18n();
+  const { data: settings } = useAboutSettings();
   const [slide, setSlide] = useState(0);
 
+  const portraitSrc = settings?.about_portrait_url || portrait;
+  const videoSrc = settings?.about_video_url || studioVideo.url;
+  const slides = (settings?.about_studio_images?.length ? settings.about_studio_images : defaultStudio) as string[];
+  const exhibitions = settings?.about_exhibitions ?? [];
+
   useEffect(() => {
+    if (slides.length < 2) return;
     const id = setInterval(() => setSlide((s) => (s + 1) % slides.length), 4000);
     return () => clearInterval(id);
-  }, []);
+  }, [slides.length]);
 
   return (
     <section className="mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 py-20 md:grid-cols-2 md:py-28">
       <div className="aspect-[4/5] overflow-hidden bg-muted">
         <img
-          src={portrait}
+          src={portraitSrc}
           alt="Portrait of the artist"
           className="h-full w-full object-cover grayscale"
         />
@@ -88,28 +96,7 @@ function About() {
           {lang === "en" ? "Selected Exhibitions" : "რჩეული გამოფენები"}
         </h2>
         <ul className="mt-10 divide-y divide-border border-y border-border">
-          {[
-            {
-              year: "2024",
-              en: { title: "Art New York — Group Exhibition", venue: "New York, USA" },
-              ka: { title: "Art New York — ჯგუფური გამოფენა", venue: "ნიუ-იორკი, აშშ" },
-            },
-            {
-              year: "2023",
-              en: { title: "Solo Show — Studio Practice", venue: "Tbilisi, Georgia" },
-              ka: { title: "სოლო გამოფენა — სტუდიური პრაქტიკა", venue: "თბილისი, საქართველო" },
-            },
-            {
-              year: "2022",
-              en: { title: "Caucasus Contemporary", venue: "Berlin, Germany" },
-              ka: { title: "კავკასიის თანამედროვე ხელოვნება", venue: "ბერლინი, გერმანია" },
-            },
-            {
-              year: "2021",
-              en: { title: "Quiet Figuration — Group Show", venue: "Tbilisi, Georgia" },
-              ka: { title: "მშვიდი ფიგურატივი — ჯგუფური გამოფენა", venue: "თბილისი, საქართველო" },
-            },
-          ].map((ex) => {
+          {exhibitions.map((ex) => {
             const loc = lang === "en" ? ex.en : ex.ka;
             return (
               <li
@@ -136,7 +123,7 @@ function About() {
         <div className="relative mt-8 aspect-[16/9] overflow-hidden bg-muted">
           {slides.map((src, i) => (
             <img
-              key={src}
+              key={src + i}
               src={src}
               alt=""
               loading="lazy"
@@ -146,18 +133,20 @@ function About() {
               style={{ opacity: slide === i ? 1 : 0 }}
             />
           ))}
-          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setSlide(i)}
-                aria-label={`Slide ${i + 1}`}
-                className="h-1.5 w-8 bg-white/40 transition-colors hover:bg-white/70"
-                style={{ backgroundColor: slide === i ? "rgba(255,255,255,0.95)" : undefined }}
-              />
-            ))}
-          </div>
+          {slides.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSlide(i)}
+                  aria-label={`Slide ${i + 1}`}
+                  className="h-1.5 w-8 bg-white/40 transition-colors hover:bg-white/70"
+                  style={{ backgroundColor: slide === i ? "rgba(255,255,255,0.95)" : undefined }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -170,7 +159,7 @@ function About() {
         </h2>
         <div className="mt-8 aspect-video overflow-hidden bg-black">
           <video
-            src={studioVideo.url}
+            src={videoSrc}
             controls
             playsInline
             preload="metadata"
