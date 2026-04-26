@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { resolveImage } from "@/lib/assetMap";
 import { SETTINGS_DEFAULTS, type SiteSettings } from "@/lib/siteSettings";
+import { ABOUT_DEFAULTS, type AboutSettings, type Exhibition } from "@/lib/aboutSettings";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/admin/")({
   component: AdminPage,
 });
 
-type TabKey = "artworks" | "products" | "settings" | "analytics";
+type TabKey = "artworks" | "products" | "about" | "settings" | "analytics";
 
 function AdminPage() {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -68,7 +69,7 @@ function AdminPage() {
       </header>
 
       <div className="mb-8 flex gap-6 border-b border-border">
-        {(["artworks", "products", "settings", "analytics"] as const).map((k) => (
+        {(["artworks", "products", "about", "settings", "analytics"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
@@ -83,6 +84,7 @@ function AdminPage() {
 
       {tab === "artworks" && <ArtworksAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "products" && <ProductsAdmin onChange={() => qc.invalidateQueries()} />}
+      {tab === "about" && <AboutAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "settings" && <SettingsAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "analytics" && <AnalyticsAdmin />}
 
