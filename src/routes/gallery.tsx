@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
 import { useCart, buildWhatsappLink } from "@/lib/cart";
+import { formatPrice } from "@/lib/siteSettings";
 
 export const Route = createFileRoute("/gallery")({
   head: () => ({
@@ -28,6 +29,8 @@ type Artwork = {
   image_url: string;
   year: number | null;
   medium: string | null;
+  price_cents: number | null;
+  currency: string | null;
 };
 
 function GalleryPage() {
@@ -200,6 +203,11 @@ function GalleryPage() {
                   <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                     {[art.medium, art.year].filter(Boolean).join(" · ")}
                   </p>
+                  {formatPrice(art.price_cents, art.currency) && (
+                    <p className="mt-1 text-[11px] font-medium tracking-wide text-foreground">
+                      {formatPrice(art.price_cents, art.currency)}
+                    </p>
+                  )}
                 </div>
               </button>
             ))}
@@ -261,6 +269,11 @@ function GalleryPage() {
               <p className="mt-1 text-xs uppercase tracking-[0.3em] text-white/60">
                 {[filtered[lightbox].medium, filtered[lightbox].year].filter(Boolean).join(" · ")}
               </p>
+              {formatPrice(filtered[lightbox].price_cents, filtered[lightbox].currency) && (
+                <p className="mt-2 serif text-xl text-white">
+                  {formatPrice(filtered[lightbox].price_cents, filtered[lightbox].currency)}
+                </p>
+              )}
               {pickLocalized(filtered[lightbox], "description", lang) && (
                 <p className="mx-auto mt-3 max-w-xl text-sm text-white/80">
                   {pickLocalized(filtered[lightbox], "description", lang)}
