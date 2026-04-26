@@ -17,7 +17,7 @@ export const Route = createFileRoute("/admin/")({
   component: AdminPage,
 });
 
-type TabKey = "artworks" | "products" | "settings";
+type TabKey = "artworks" | "products" | "settings" | "analytics";
 
 function AdminPage() {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -68,7 +68,7 @@ function AdminPage() {
       </header>
 
       <div className="mb-8 flex gap-6 border-b border-border">
-        {(["artworks", "products", "settings"] as const).map((k) => (
+        {(["artworks", "products", "settings", "analytics"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
@@ -84,6 +84,7 @@ function AdminPage() {
       {tab === "artworks" && <ArtworksAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "products" && <ProductsAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "settings" && <SettingsAdmin onChange={() => qc.invalidateQueries()} />}
+      {tab === "analytics" && <AnalyticsAdmin />}
 
       <Link to="/" className="mt-12 inline-block text-xs uppercase tracking-[0.25em] text-muted-foreground hover:text-foreground">
         ← View site
