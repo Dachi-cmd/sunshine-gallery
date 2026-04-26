@@ -1,15 +1,19 @@
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-
-const socials = [
-  { href: "https://instagram.com/", label: "Instagram", Icon: Instagram },
-  { href: "https://youtube.com/", label: "YouTube", Icon: Youtube },
-  { href: "https://facebook.com/", label: "Facebook", Icon: Facebook },
-  { href: "https://linkedin.com/", label: "LinkedIn", Icon: Linkedin },
-];
+import { useSiteSettings, SETTINGS_DEFAULTS } from "@/lib/siteSettings";
 
 export function SiteFooter() {
   const { t } = useI18n();
+  const { data } = useSiteSettings();
+  const s = data ?? SETTINGS_DEFAULTS;
+
+  const socials = [
+    { href: s.social_instagram, label: "Instagram", Icon: Instagram },
+    { href: s.social_youtube, label: "YouTube", Icon: Youtube },
+    { href: s.social_facebook, label: "Facebook", Icon: Facebook },
+    { href: s.social_linkedin, label: "LinkedIn", Icon: Linkedin },
+  ].filter((x) => x.href && x.href.trim().length > 0);
+
   return (
     <footer className="mt-32 border-t border-border bg-surface">
       <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-6 py-12 md:flex-row md:items-center">
@@ -38,13 +42,13 @@ export function SiteFooter() {
             {t("footer.contact")}
           </p>
           <p>
-            <a href="tel:+995597009391" className="hover:text-accent transition">
-              597 00 93 91
+            <a href={`tel:${s.contact_phone_link}`} className="hover:text-accent transition">
+              {s.contact_phone}
             </a>
           </p>
           <p>
-            <a href="mailto:abramishvilidaviti@yahoo.com" className="hover:text-accent transition">
-              abramishvilidaviti@yahoo.com
+            <a href={`mailto:${s.contact_email}`} className="hover:text-accent transition">
+              {s.contact_email}
             </a>
           </p>
         </div>
