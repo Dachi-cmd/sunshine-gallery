@@ -619,3 +619,118 @@ function Textarea({ label, value, onChange }: { label: string; value: string; on
     </div>
   );
 }
+
+function AnalyticsAdmin() {
+  const visitsQ = useQuery({
+    queryKey: ["admin-visits"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_visits")
+        .select("id, path, referrer, user_agent, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const usersQ = useQuery({
+    queryKey: ["admin-users"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, email, display_name, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const visits = visitsQ.data ?? [];
+  const now = Date.now();
+  const last24 = visits.filter((v) => now - new Date(v.created_at).getTime() < 86400000).length;
+  const last7 = visits.filter((v) => now - new Date(v.created_at).getTime() < 7 * 86400000).length;
+
+  return (
+    <div className="space-y-12">
+      <div>
+        <h2 className="serif text-2xl mb-4">Visits</h2>
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <Stat label="Total (recent)" value={visits.length} />
+          <Stat label="Last 24h" value={last24} />
+          <Stat label="Last 7 days" value={last7} />
+        </div>
+        <div className="overflow-auto border border-border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/30 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <tr>
+                <th className="text-left p-2">When</th>
+                <th className="text-left p-2">Path</th>
+                <th className="text-left p-2">Referrer</th>
+                <th className="text-left p-2">User agent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visitsQ.isLoading && (
+                <tr><td colSpan={4} className="p-4 text-muted-foreground">Loading…</td></tr>
+              )}
+              {visits.map((v) => (
+                <tr key={v.id} className="border-t border-border">
+                  <td className="p-2 whitespace-nowrap">{new Date(v.created_at).toLocaleString()}</td>
+                  <td className="p-2">{v.path ?? "—"}</td>
+                  <td className="p-2 max-w-[200px] truncate" title={v.referrer ?? ""}>{v.referrer || "—"}</td>
+                  <td className="p-2 max-w-[280px] truncate text-muted-foreground" title={v.user_agent ?? ""}>{v.user_agent || "—"}</td>
+                </tr>
+              ))}
+              {!visitsQ.isLoading && visits.length === 0 && (
+                <tr><td colSpan={4} className="p-4 text-muted-foreground">No visits yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="serif text-2xl mb-4">Registered users</h2>
+        <div className="grid grid-cols-1 gap-4 mb-6">
+          <Stat label="Total users" value={usersQ.data?.length ?? 0} />
+        </div>
+        <div className="overflow-auto border border-border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/30 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              <tr>
+                <th className="text-left p-2">Registered</th>
+                <th className="text-left p-2">Name</th>
+                <th className="text-left p-2">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usersQ.isLoading && (
+                <tr><td colSpan={3} className="p-4 text-muted-foreground">Loading…</td></tr>
+              )}
+              {(usersQ.data ?? []).map((u) => (
+                <tr key={u.id} className="border-t border-border">
+                  <td className="p-2 whitespace-nowrap">{new Date(u.created_at).toLocaleString()}</td>
+                  <td className="p-2">{u.display_name || "—"}</td>
+                  <td className="p-2">{u.email || "—"}</td>
+                </tr>
+              ))}
+              {!usersQ.isLoading && (usersQ.data?.length ?? 0) === 0 && (
+                <tr><td colSpan={3} className="p-4 text-muted-foreground">No users yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="border border-border p-4">
+      <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">{label}</div>
+      <div className="serif text-3xl mt-2">{value}</div>
+    </div>
+  );
+}
