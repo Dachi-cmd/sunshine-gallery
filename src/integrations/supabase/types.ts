@@ -17,11 +17,13 @@ export type Database = {
       artworks: {
         Row: {
           created_at: string
+          currency: string
           description: string | null
           description_ka: string | null
           id: string
           image_url: string
           medium: string | null
+          price_cents: number | null
           published: boolean
           sort_order: number
           title: string
@@ -31,11 +33,13 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency?: string
           description?: string | null
           description_ka?: string | null
           id?: string
           image_url: string
           medium?: string | null
+          price_cents?: number | null
           published?: boolean
           sort_order?: number
           title: string
@@ -45,11 +49,13 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency?: string
           description?: string | null
           description_ka?: string | null
           id?: string
           image_url?: string
           medium?: string | null
+          price_cents?: number | null
           published?: boolean
           sort_order?: number
           title?: string
@@ -163,6 +169,24 @@ export type Database = {
           email?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string | null
         }
         Relationships: []
       }
