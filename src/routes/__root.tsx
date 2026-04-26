@@ -1,6 +1,7 @@
 import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackVisit } from "@/lib/trackVisit";
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/lib/theme";
@@ -81,6 +82,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const [qc] = useState(() => new QueryClient());
+  useEffect(() => {
+    trackVisit();
+  }, []);
   return (
     <QueryClientProvider client={qc}>
       <ThemeProvider>
