@@ -338,7 +338,17 @@ type ProductRow = {
   image_url: string;
   price_cents: number;
   currency: string;
+  category: string;
 };
+
+export const PRODUCT_CATEGORIES = [
+  { value: "t-shirts", label: "T-Shirts" },
+  { value: "hoodies", label: "Hoodies" },
+  { value: "backpacks", label: "Backpacks" },
+  { value: "posters", label: "Posters" },
+  { value: "postcards", label: "Postcards" },
+  { value: "other", label: "Other" },
+] as const;
 
 function ProductsAdmin({ onChange }: { onChange: () => void }) {
   const { data, refetch } = useQuery({
@@ -350,7 +360,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
     },
   });
 
-  const [form, setForm] = useState({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "" });
+  const [form, setForm] = useState({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "", category: "t-shirts" });
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
