@@ -338,7 +338,17 @@ type ProductRow = {
   image_url: string;
   price_cents: number;
   currency: string;
+  category: string;
 };
+
+export const PRODUCT_CATEGORIES = [
+  { value: "t-shirts", label: "T-Shirts" },
+  { value: "hoodies", label: "Hoodies" },
+  { value: "backpacks", label: "Backpacks" },
+  { value: "posters", label: "Posters" },
+  { value: "postcards", label: "Postcards" },
+  { value: "other", label: "Other" },
+] as const;
 
 function ProductsAdmin({ onChange }: { onChange: () => void }) {
   const { data, refetch } = useQuery({
@@ -350,7 +360,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
     },
   });
 
-  const [form, setForm] = useState({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "" });
+  const [form, setForm] = useState({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "", category: "t-shirts" });
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -371,11 +381,12 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
         description: form.description || null,
         description_ka: form.description_ka || null,
         image_url,
+        category: form.category,
         sort_order: (data?.length ?? 0) + 1,
       });
       if (error) throw error;
       toast.success("Product added");
-      setForm({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "" });
+      setForm({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "", category: "t-shirts" });
       setFile(null);
       void refetch();
       onChange();
@@ -403,6 +414,18 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
         <div className="grid grid-cols-2 gap-3">
           <Input label="Price" value={form.price} onChange={(v) => setForm({ ...form, price: v })} type="number" required />
           <Input label="Currency" value={form.currency} onChange={(v) => setForm({ ...form, currency: v })} />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Category</label>
+          <select
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className="mt-2 block w-full rounded border border-border bg-background px-3 py-2 text-sm"
+          >
+            {PRODUCT_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
         </div>
         <Textarea label="Description (EN)" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
         <Textarea label="Description (KA)" value={form.description_ka} onChange={(v) => setForm({ ...form, description_ka: v })} />
@@ -443,7 +466,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
               <img src={resolveImage(p.image_url)} alt={p.name} className="h-24 w-24 object-cover bg-muted" />
               <div className="flex-1">
                 <p className="serif text-lg">{p.name}</p>
-                <p className="text-xs text-muted-foreground">{(p.price_cents / 100).toFixed(2)} {p.currency}</p>
+                <p className="text-xs text-muted-foreground">{(p.price_cents / 100).toFixed(2)} {p.currency} · {p.category}</p>
                 <div className="mt-2 flex gap-3 text-[11px] uppercase tracking-[0.2em]">
                   <button onClick={() => setEditingId(p.id)} className="hover:text-accent">Edit</button>
                   <button onClick={() => void remove(p.id)} className="text-destructive hover:opacity-70">
@@ -467,6 +490,7 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
     currency: product.currency,
     description: product.description ?? "",
     description_ka: product.description_ka ?? "",
+    category: product.category ?? "other",
   });
   const [busy, setBusy] = useState(false);
 
@@ -484,6 +508,7 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
         currency: form.currency,
         description: form.description || null,
         description_ka: form.description_ka || null,
+        category: form.category,
       })
       .eq("id", product.id);
     setBusy(false);
@@ -504,6 +529,18 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
       <div className="grid grid-cols-2 gap-3">
         <Input label="Price" value={form.price} onChange={(v) => setForm({ ...form, price: v })} type="number" required />
         <Input label="Currency" value={form.currency} onChange={(v) => setForm({ ...form, currency: v })} />
+      </div>
+      <div>
+        <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Category</label>
+        <select
+          value={form.category}
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
+          className="mt-2 block w-full rounded border border-border bg-background px-3 py-2 text-sm"
+        >
+          {PRODUCT_CATEGORIES.map((c) => (
+            <option key={c.value} value={c.value}>{c.label}</option>
+          ))}
+        </select>
       </div>
       <Textarea label="Description (EN)" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
       <Textarea label="Description (KA)" value={form.description_ka} onChange={(v) => setForm({ ...form, description_ka: v })} />
