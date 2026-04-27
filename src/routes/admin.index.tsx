@@ -508,6 +508,7 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
         currency: form.currency,
         description: form.description || null,
         description_ka: form.description_ka || null,
+        category: form.category,
       })
       .eq("id", product.id);
     setBusy(false);
@@ -528,6 +529,18 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
       <div className="grid grid-cols-2 gap-3">
         <Input label="Price" value={form.price} onChange={(v) => setForm({ ...form, price: v })} type="number" required />
         <Input label="Currency" value={form.currency} onChange={(v) => setForm({ ...form, currency: v })} />
+      </div>
+      <div>
+        <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Category</label>
+        <select
+          value={form.category}
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
+          className="mt-2 block w-full rounded border border-border bg-background px-3 py-2 text-sm"
+        >
+          {PRODUCT_CATEGORIES.map((c) => (
+            <option key={c.value} value={c.value}>{c.label}</option>
+          ))}
+        </select>
       </div>
       <Textarea label="Description (EN)" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
       <Textarea label="Description (KA)" value={form.description_ka} onChange={(v) => setForm({ ...form, description_ka: v })} />
