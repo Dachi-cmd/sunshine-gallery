@@ -381,11 +381,12 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
         description: form.description || null,
         description_ka: form.description_ka || null,
         image_url,
+        category: form.category,
         sort_order: (data?.length ?? 0) + 1,
       });
       if (error) throw error;
       toast.success("Product added");
-      setForm({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "" });
+      setForm({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "", category: "t-shirts" });
       setFile(null);
       void refetch();
       onChange();
