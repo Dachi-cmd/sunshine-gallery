@@ -794,7 +794,7 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
       const { data, error } = await supabase
         .from("site_settings")
         .select("key,value")
-        .in("key", ["about_portrait_url", "about_video_url", "about_studio_images", "about_exhibitions"]);
+        .in("key", ["about_portrait_url", "about_video_url", "about_studio_images", "about_exhibitions", "about_bio_en", "about_bio_ka"]);
       if (error) throw error;
       const map: Record<string, string | null> = {};
       for (const r of data ?? []) map[r.key] = r.value;
@@ -807,6 +807,8 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
         about_video_url: map.about_video_url || ABOUT_DEFAULTS.about_video_url,
         about_studio_images: parse<string[]>(map.about_studio_images, ABOUT_DEFAULTS.about_studio_images),
         about_exhibitions: parse<Exhibition[]>(map.about_exhibitions, ABOUT_DEFAULTS.about_exhibitions),
+        about_bio_en: map.about_bio_en || ABOUT_DEFAULTS.about_bio_en,
+        about_bio_ka: map.about_bio_ka || ABOUT_DEFAULTS.about_bio_ka,
       };
     },
   });
