@@ -794,7 +794,7 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
       const { data, error } = await supabase
         .from("site_settings")
         .select("key,value")
-        .in("key", ["about_portrait_url", "about_video_url", "about_studio_images", "about_exhibitions"]);
+        .in("key", ["about_portrait_url", "about_video_url", "about_studio_images", "about_exhibitions", "about_bio_en", "about_bio_ka"]);
       if (error) throw error;
       const map: Record<string, string | null> = {};
       for (const r of data ?? []) map[r.key] = r.value;
@@ -807,6 +807,8 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
         about_video_url: map.about_video_url || ABOUT_DEFAULTS.about_video_url,
         about_studio_images: parse<string[]>(map.about_studio_images, ABOUT_DEFAULTS.about_studio_images),
         about_exhibitions: parse<Exhibition[]>(map.about_exhibitions, ABOUT_DEFAULTS.about_exhibitions),
+        about_bio_en: map.about_bio_en || ABOUT_DEFAULTS.about_bio_en,
+        about_bio_ka: map.about_bio_ka || ABOUT_DEFAULTS.about_bio_ka,
       };
     },
   });
@@ -828,6 +830,8 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
       { key: "about_video_url", value: next.about_video_url },
       { key: "about_studio_images", value: JSON.stringify(next.about_studio_images) },
       { key: "about_exhibitions", value: JSON.stringify(next.about_exhibitions) },
+      { key: "about_bio_en", value: next.about_bio_en },
+      { key: "about_bio_ka", value: next.about_bio_ka },
     ];
     const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
     if (error) toast.error(error.message);
@@ -950,6 +954,21 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
             )}
           </div>
         </div>
+      </section>
+
+      <section className="space-y-4 rounded border border-border bg-surface p-6">
+        <h2 className="serif text-xl">About text / Bio</h2>
+        <p className="text-xs text-muted-foreground">Paragraphs of the artist bio shown on the About page. Separate paragraphs with a blank line.</p>
+        <Textarea
+          label="Bio (EN)"
+          value={form.about_bio_en}
+          onChange={(v) => setForm({ ...form, about_bio_en: v })}
+        />
+        <Textarea
+          label="Bio (KA)"
+          value={form.about_bio_ka}
+          onChange={(v) => setForm({ ...form, about_bio_ka: v })}
+        />
       </section>
 
       <section className="space-y-4 rounded border border-border bg-surface p-6">
