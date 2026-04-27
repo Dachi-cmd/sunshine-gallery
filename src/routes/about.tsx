@@ -55,40 +55,11 @@ function About() {
           {t("about.title")}
         </p>
         <h1 className="serif mt-4 text-4xl md:text-5xl">Davit Abramishvili</h1>
-        {lang === "en" ? (
-          <div className="mt-8 space-y-5 text-base leading-relaxed text-foreground/90">
-            <p>
-              Davit Abramishvili is a painter based in Tbilisi, Georgia. His practice moves between
-              quiet figuration, atmospheric landscape, and intimate still life — pursuing a single
-              question: how does paint hold time?
-            </p>
-            <p>
-              Working primarily in oil on canvas and linen, Davit builds his images slowly in thin,
-              translucent layers, letting the surface settle before returning. The work has been
-              exhibited in group and solo shows across the Caucasus and Europe.
-            </p>
-            <p>
-              The studio remains open to collectors and curators by appointment. For inquiries about
-              available works, commissions, or studio visits, please get in touch directly.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-8 space-y-5 text-base leading-relaxed text-foreground/90">
-            <p>
-              დავით აბრამიშვილი მხატვარია, რომელიც თბილისში მუშაობს. მისი პრაქტიკა მოიცავს მშვიდ
-              ფიგურატივს, ატმოსფერულ პეიზაჟს და ინტიმურ ნატურმორტს — ერთი კითხვის გარშემო: როგორ
-              ინახავს საღებავი დროს?
-            </p>
-            <p>
-              ძირითადად ზეთით ტილოსა და ტილოზე მუშაობს, სურათებს ნელა და თხელი, გამჭვირვალე ფენებით
-              ქმნის. ნამუშევრები გამოფენილია კავკასიასა და ევროპაში.
-            </p>
-            <p>
-              სტუდია ღიაა კოლექციონერებისა და კურატორებისთვის შეთანხმებით. დაკავშირებისთვის გთხოვთ
-              მოგვწეროთ ან დაგვირეკოთ.
-            </p>
-          </div>
-        )}
+        <div className="mt-8 space-y-5 text-base leading-relaxed text-foreground/90">
+          {bioParagraphs.map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
+        </div>
       </div>
       <div className="md:col-span-2">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
