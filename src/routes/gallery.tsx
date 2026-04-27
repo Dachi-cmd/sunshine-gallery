@@ -40,6 +40,7 @@ function GalleryPage() {
   const [medium, setMedium] = useState<string>("");
   const [year, setYear] = useState<string>("");
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["artworks-all"],
@@ -94,6 +95,10 @@ function GalleryPage() {
     setMedium("");
     setYear("");
   };
+
+  useEffect(() => {
+    setDescExpanded(false);
+  }, [lightbox]);
 
   // Lightbox keyboard nav
   useEffect(() => {
@@ -274,11 +279,31 @@ function GalleryPage() {
                   {formatPrice(filtered[lightbox].price_cents, filtered[lightbox].currency)}
                 </p>
               )}
-              {pickLocalized(filtered[lightbox], "description", lang) && (
-                <p className="mx-auto mt-3 max-w-xl text-sm text-white/80">
-                  {pickLocalized(filtered[lightbox], "description", lang)}
-                </p>
-              )}
+              {pickLocalized(filtered[lightbox], "description", lang) && (() => {
+                const desc = pickLocalized(filtered[lightbox], "description", lang) as string;
+                const LIMIT = 180;
+                const isLong = desc.length > LIMIT;
+                const shown = !isLong || descExpanded ? desc : desc.slice(0, LIMIT).trimEnd() + "…";
+                return (
+                  <div className="mx-auto mt-3 max-w-xl">
+                    <p className={`text-sm text-white/80 ${descExpanded ? "max-h-[40vh] overflow-y-auto pr-2" : ""}`}>
+                      {shown}
+                    </p>
+                    {isLong && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDescExpanded((v) => !v);
+                        }}
+                        className="mt-2 text-[11px] uppercase tracking-[0.25em] text-white/70 underline-offset-4 hover:text-white hover:underline"
+                      >
+                        {descExpanded ? t("gallery.less") ?? "Less" : t("gallery.more") ?? "More"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
                 <button
                   type="button"
