@@ -1,8 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
+
+const CATEGORIES = [
+  { value: "all", label: "All" },
+  { value: "t-shirts", label: "T-Shirts" },
+  { value: "hoodies", label: "Hoodies" },
+  { value: "backpacks", label: "Backpacks" },
+  { value: "posters", label: "Posters" },
+  { value: "postcards", label: "Postcards" },
+  { value: "other", label: "Other" },
+] as const;
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -22,6 +33,7 @@ function formatPrice(cents: number, currency: string) {
 
 function Shop() {
   const { lang, t } = useI18n();
+  const [category, setCategory] = useState<string>("all");
   const { data, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
@@ -34,6 +46,8 @@ function Shop() {
       return data;
     },
   });
+
+  const filtered = (data ?? []).filter((p) => category === "all" || (p.category ?? "other") === category);
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-20 md:py-28">
