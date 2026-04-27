@@ -830,6 +830,8 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
       { key: "about_video_url", value: next.about_video_url },
       { key: "about_studio_images", value: JSON.stringify(next.about_studio_images) },
       { key: "about_exhibitions", value: JSON.stringify(next.about_exhibitions) },
+      { key: "about_bio_en", value: next.about_bio_en },
+      { key: "about_bio_ka", value: next.about_bio_ka },
     ];
     const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
     if (error) toast.error(error.message);
