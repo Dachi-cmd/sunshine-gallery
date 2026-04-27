@@ -32,6 +32,8 @@ function About() {
   const videoSrc = settings?.about_video_url || studioVideo.url;
   const slides = (settings?.about_studio_images?.length ? settings.about_studio_images : defaultStudio) as string[];
   const exhibitions = settings?.about_exhibitions ?? [];
+  const bio = (lang === "en" ? settings?.about_bio_en : settings?.about_bio_ka) ?? "";
+  const bioParagraphs = bio.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
 
   useEffect(() => {
     if (slides.length < 2) return;
