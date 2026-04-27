@@ -969,6 +969,7 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
           value={form.about_bio_ka}
           onChange={(v) => setForm({ ...form, about_bio_ka: v })}
         />
+      </section>
 
       <section className="space-y-4 rounded border border-border bg-surface p-6">
         <h2 className="serif text-xl">Studio video</h2>
