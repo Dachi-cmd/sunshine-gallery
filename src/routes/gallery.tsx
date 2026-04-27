@@ -222,118 +222,126 @@ function GalleryPage() {
       )}
 
       {/* Lightbox */}
-      {lightbox !== null && filtered[lightbox] && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
-          onClick={() => setLightbox(null)}
-        >
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightbox(null);
-            }}
-            className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
-            aria-label="Close"
+      {lightbox !== null && filtered[lightbox] && (() => {
+        const art = filtered[lightbox];
+        const desc = pickLocalized(art, "description", lang) as string | null;
+        const LIMIT = 240;
+        const isLong = !!desc && desc.length > LIMIT;
+        const shownDesc = !desc ? "" : !isLong || descExpanded ? desc : desc.slice(0, LIMIT).trimEnd() + "…";
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-3 sm:p-6 backdrop-blur-sm"
+            onClick={() => setLightbox(null)}
           >
-            <X size={18} />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightbox((i) => (i === null ? null : (i - 1 + filtered.length) % filtered.length));
-            }}
-            className="absolute left-4 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
-            aria-label="Previous"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightbox((i) => (i === null ? null : (i + 1) % filtered.length));
-            }}
-            className="absolute right-4 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
-            aria-label="Next"
-          >
-            <ChevronRight size={20} />
-          </button>
-          <figure
-            className="flex max-h-full max-w-5xl flex-col items-center gap-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={resolveImage(filtered[lightbox].image_url)}
-              alt={pickLocalized(filtered[lightbox], "title", lang)}
-              className="max-h-[75vh] w-auto object-contain shadow-2xl"
-            />
-            <figcaption className="text-center text-white">
-              <p className="serif text-2xl">{pickLocalized(filtered[lightbox], "title", lang)}</p>
-              <p className="mt-1 text-xs uppercase tracking-[0.3em] text-white/60">
-                {[filtered[lightbox].medium, filtered[lightbox].year].filter(Boolean).join(" · ")}
-              </p>
-              {formatPrice(filtered[lightbox].price_cents, filtered[lightbox].currency) && (
-                <p className="mt-2 serif text-xl text-white">
-                  {formatPrice(filtered[lightbox].price_cents, filtered[lightbox].currency)}
-                </p>
-              )}
-              {pickLocalized(filtered[lightbox], "description", lang) && (() => {
-                const desc = pickLocalized(filtered[lightbox], "description", lang) as string;
-                const LIMIT = 180;
-                const isLong = desc.length > LIMIT;
-                const shown = !isLong || descExpanded ? desc : desc.slice(0, LIMIT).trimEnd() + "…";
-                return (
-                  <div className="mx-auto mt-3 max-w-xl">
-                    <p className={`text-sm text-white/80 ${descExpanded ? "max-h-[40vh] overflow-y-auto pr-2" : ""}`}>
-                      {shown}
-                    </p>
-                    {isLong && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDescExpanded((v) => !v);
-                        }}
-                        className="mt-2 text-[11px] uppercase tracking-[0.25em] text-white/70 underline-offset-4 hover:text-white hover:underline"
-                      >
-                        {descExpanded ? t("gallery.less") ?? "Less" : t("gallery.more") ?? "More"}
-                      </button>
-                    )}
-                  </div>
-                );
-              })()}
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    void addToCart(filtered[lightbox].id);
-                  }}
-                  className="inline-flex items-center gap-2 bg-white px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-black transition hover:bg-white/90"
-                >
-                  <ShoppingBag size={13} /> {t("cart.add")}
-                </button>
-                <a
-                  href={buildWhatsappLink(
-                    `Hi! I'm interested in "${pickLocalized(filtered[lightbox], "title", lang)}"${filtered[lightbox].year ? ` (${filtered[lightbox].year})` : ""}.`,
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-2 border border-white/40 px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-white transition hover:bg-white/10"
-                >
-                  <MessageCircle size={13} /> {t("cart.inquire")}
-                </a>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox(null);
+              }}
+              className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((i) => (i === null ? null : (i - 1 + filtered.length) % filtered.length));
+              }}
+              className="absolute left-2 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              aria-label="Previous"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((i) => (i === null ? null : (i + 1) % filtered.length));
+              }}
+              className="absolute right-2 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              aria-label="Next"
+            >
+              <ChevronRight size={18} />
+            </button>
+
+            <div
+              className="flex h-full max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-sm bg-black shadow-2xl md:flex-row"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Image side — preserves natural aspect */}
+              <div className="flex flex-1 items-center justify-center bg-black p-4 md:p-6 min-h-0">
+                <img
+                  src={resolveImage(art.image_url)}
+                  alt={pickLocalized(art, "title", lang)}
+                  className="max-h-full max-w-full object-contain"
+                />
               </div>
-              <p className="mt-3 text-[10px] uppercase tracking-[0.3em] text-white/40">
-                {lightbox + 1} / {filtered.length}
-              </p>
-            </figcaption>
-          </figure>
-        </div>
-      )}
+
+              {/* Info side — fixed-width black panel */}
+              <aside className="flex w-full shrink-0 flex-col bg-black text-white md:w-[340px] md:border-l md:border-white/10">
+                <div className="flex-1 overflow-y-auto px-6 py-6 md:px-7 md:py-8">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/40">
+                    {lightbox + 1} / {filtered.length}
+                  </p>
+                  <h2 className="serif mt-3 text-2xl leading-tight md:text-3xl">
+                    {pickLocalized(art, "title", lang)}
+                  </h2>
+                  {(art.medium || art.year) && (
+                    <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-white/50">
+                      {[art.medium, art.year].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                  {formatPrice(art.price_cents, art.currency) && (
+                    <p className="serif mt-4 text-xl text-white">
+                      {formatPrice(art.price_cents, art.currency)}
+                    </p>
+                  )}
+                  {desc && (
+                    <div className="mt-5 border-t border-white/10 pt-4">
+                      <p className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                        {lang === "en" ? "Description" : "აღწერა"}
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-white/80">{shownDesc}</p>
+                      {isLong && (
+                        <button
+                          type="button"
+                          onClick={() => setDescExpanded((v) => !v)}
+                          className="mt-2 text-[10px] uppercase tracking-[0.25em] text-white/60 underline-offset-4 hover:text-white hover:underline"
+                        >
+                          {descExpanded ? t("gallery.less") ?? "Less" : t("gallery.more") ?? "More"}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2 border-t border-white/10 bg-black px-5 py-4 md:px-7 md:py-5">
+                  <button
+                    type="button"
+                    onClick={() => void addToCart(art.id)}
+                    className="inline-flex w-full items-center justify-center gap-1.5 bg-white px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-black transition hover:bg-white/90"
+                  >
+                    <ShoppingBag size={12} /> {t("cart.add")}
+                  </button>
+                  <a
+                    href={buildWhatsappLink(
+                      `Hi! I'm interested in "${pickLocalized(art, "title", lang)}"${art.year ? ` (${art.year})` : ""}.`,
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-full items-center justify-center gap-1.5 border border-white/30 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-white transition hover:bg-white/10"
+                  >
+                    <MessageCircle size={12} /> {t("cart.inquire")}
+                  </a>
+                </div>
+              </aside>
+            </div>
+          </div>
+        );
+      })()}
     </section>
   );
 }
