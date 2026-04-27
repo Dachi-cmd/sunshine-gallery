@@ -957,6 +957,20 @@ function AboutAdmin({ onChange }: { onChange: () => void }) {
       </section>
 
       <section className="space-y-4 rounded border border-border bg-surface p-6">
+        <h2 className="serif text-xl">About text / Bio</h2>
+        <p className="text-xs text-muted-foreground">Paragraphs of the artist bio shown on the About page. Separate paragraphs with a blank line.</p>
+        <Textarea
+          label="Bio (EN)"
+          value={form.about_bio_en}
+          onChange={(v) => setForm({ ...form, about_bio_en: v })}
+        />
+        <Textarea
+          label="Bio (KA)"
+          value={form.about_bio_ka}
+          onChange={(v) => setForm({ ...form, about_bio_ka: v })}
+        />
+
+      <section className="space-y-4 rounded border border-border bg-surface p-6">
         <h2 className="serif text-xl">Studio video</h2>
         <p className="text-xs text-muted-foreground">MP4 file. Replaces the studio video at the bottom of About.</p>
         <div className="flex gap-6">
