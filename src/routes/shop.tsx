@@ -56,13 +56,27 @@ function Shop() {
         <h1 className="serif mt-2 text-4xl md:text-5xl">Shop</h1>
       </header>
 
+      <div className="mb-10 flex flex-wrap gap-x-6 gap-y-2 border-b border-border pb-4">
+        {CATEGORIES.map((c) => (
+          <button
+            key={c.value}
+            onClick={() => setCategory(c.value)}
+            className={`text-xs uppercase tracking-[0.25em] transition ${
+              category === c.value ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
       {isLoading && <p className="text-muted-foreground">…</p>}
-      {!isLoading && (!data || data.length === 0) && (
+      {!isLoading && filtered.length === 0 && (
         <p className="text-muted-foreground">{t("shop.empty")}</p>
       )}
 
       <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-        {data?.map((p) => (
+        {filtered.map((p) => (
           <article key={p.id} className="group">
             <div className="aspect-square overflow-hidden bg-muted">
               <img
