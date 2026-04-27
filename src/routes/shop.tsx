@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
+import { formatPrice } from "@/lib/siteSettings";
 
 const CATEGORIES = [
   { value: "all", label: "All" },
@@ -27,9 +28,6 @@ export const Route = createFileRoute("/shop")({
   component: Shop,
 });
 
-function formatPrice(cents: number, currency: string) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
-}
 
 function Shop() {
   const { lang, t } = useI18n();
@@ -94,7 +92,7 @@ function Shop() {
                 </p>
               </div>
               <div className="text-right">
-                <p className="serif text-xl">{formatPrice(p.price_cents, p.currency)}</p>
+                <p className="serif text-xl">{formatPrice(p.price_cents, p.currency, lang)}</p>
                 {p.in_stock ? (
                   <a
                     href={`mailto:abramishvilidaviti@yahoo.com?subject=${encodeURIComponent(
