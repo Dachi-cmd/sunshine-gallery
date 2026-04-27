@@ -208,9 +208,9 @@ function GalleryPage() {
                   <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                     {[art.medium, art.year].filter(Boolean).join(" · ")}
                   </p>
-                  {formatPrice(art.price_cents, art.currency) && (
+                  {formatPrice(art.price_cents, art.currency, lang) && (
                     <p className="mt-1 text-[11px] font-medium tracking-wide text-foreground">
-                      {formatPrice(art.price_cents, art.currency)}
+                      {formatPrice(art.price_cents, art.currency, lang)}
                     </p>
                   )}
                 </div>
@@ -294,9 +294,9 @@ function GalleryPage() {
                       {[art.medium, art.year].filter(Boolean).join(" · ")}
                     </p>
                   )}
-                  {formatPrice(art.price_cents, art.currency) && (
+                  {formatPrice(art.price_cents, art.currency, lang) && (
                     <p className="serif mt-4 text-xl text-white">
-                      {formatPrice(art.price_cents, art.currency)}
+                      {formatPrice(art.price_cents, art.currency, lang)}
                     </p>
                   )}
                   {desc && (

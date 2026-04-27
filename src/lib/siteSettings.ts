@@ -38,12 +38,30 @@ export function useSiteSettings() {
   });
 }
 
-export function formatPrice(priceCents: number | null | undefined, currency: string | null | undefined): string | null {
+// Approximate USD -> GEL conversion rate used for display when language is Georgian.
+export const USD_TO_GEL = 2.7;
+
+export function formatPrice(
+  priceCents: number | null | undefined,
+  currency: string | null | undefined,
+  lang?: "en" | "ka",
+): string | null {
   if (priceCents == null || !Number.isFinite(priceCents)) return null;
-  const cur = currency || "USD";
+  let cur = currency || "USD";
+  let amount = priceCents / 100;
+  if (lang === "ka") {
+    if (cur.toUpperCase() === "USD") {
+      amount = amount * USD_TO_GEL;
+    }
+    cur = "GEL";
+  }
   try {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(priceCents / 100);
+    return new Intl.NumberFormat(lang === "ka" ? "ka-GE" : "en-US", {
+      style: "currency",
+      currency: cur,
+      maximumFractionDigits: 0,
+    }).format(amount);
   } catch {
-    return `${(priceCents / 100).toFixed(0)} ${cur}`;
+    return `${amount.toFixed(0)} ${cur}`;
   }
 }
