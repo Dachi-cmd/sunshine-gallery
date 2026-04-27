@@ -415,6 +415,18 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
           <Input label="Price" value={form.price} onChange={(v) => setForm({ ...form, price: v })} type="number" required />
           <Input label="Currency" value={form.currency} onChange={(v) => setForm({ ...form, currency: v })} />
         </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Category</label>
+          <select
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className="mt-2 block w-full rounded border border-border bg-background px-3 py-2 text-sm"
+          >
+            {PRODUCT_CATEGORIES.map((c) => (
+              <option key={c.value} value={c.value}>{c.label}</option>
+            ))}
+          </select>
+        </div>
         <Textarea label="Description (EN)" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
         <Textarea label="Description (KA)" value={form.description_ka} onChange={(v) => setForm({ ...form, description_ka: v })} />
         <div>
@@ -454,7 +466,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
               <img src={resolveImage(p.image_url)} alt={p.name} className="h-24 w-24 object-cover bg-muted" />
               <div className="flex-1">
                 <p className="serif text-lg">{p.name}</p>
-                <p className="text-xs text-muted-foreground">{(p.price_cents / 100).toFixed(2)} {p.currency}</p>
+                <p className="text-xs text-muted-foreground">{(p.price_cents / 100).toFixed(2)} {p.currency} · {p.category}</p>
                 <div className="mt-2 flex gap-3 text-[11px] uppercase tracking-[0.2em]">
                   <button onClick={() => setEditingId(p.id)} className="hover:text-accent">Edit</button>
                   <button onClick={() => void remove(p.id)} className="text-destructive hover:opacity-70">
@@ -478,6 +490,7 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
     currency: product.currency,
     description: product.description ?? "",
     description_ka: product.description_ka ?? "",
+    category: product.category ?? "other",
   });
   const [busy, setBusy] = useState(false);
 
