@@ -344,7 +344,7 @@ type ProductRow = {
 export const PRODUCT_CATEGORIES = [
   { value: "t-shirts", label: "T-Shirts" },
   { value: "hoodies", label: "Hoodies" },
-  { value: "backpacks", label: "Backpacks" },
+  { value: "bags", label: "Bags" },
   { value: "posters", label: "Posters" },
   { value: "postcards", label: "Postcards" },
   { value: "other", label: "Other" },
