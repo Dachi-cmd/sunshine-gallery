@@ -8,6 +8,7 @@ import studio4 from "@/assets/studio-4.jpg";
 import studioVideo from "@/assets/studio-video.mp4.asset.json";
 import { useI18n } from "@/lib/i18n";
 import { useAboutSettings } from "@/lib/aboutSettings";
+import { useSiteSettings } from "@/lib/siteSettings";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -26,6 +27,7 @@ const defaultStudio = [studio1, studio2, studio3, studio4];
 function About() {
   const { t, lang } = useI18n();
   const { data: settings } = useAboutSettings();
+  const { data: site } = useSiteSettings();
   const [slide, setSlide] = useState(0);
 
   const portraitSrc = settings?.about_portrait_url || portrait;
@@ -34,6 +36,8 @@ function About() {
   const exhibitions = settings?.about_exhibitions ?? [];
   const bio = (lang === "en" ? settings?.about_bio_en : settings?.about_bio_ka) ?? "";
   const bioParagraphs = bio.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
+  const aboutKicker = (lang === "ka" ? site?.about_kicker_ka : site?.about_kicker_en) || t("about.title");
+  const aboutTitle = (lang === "ka" ? site?.about_title_ka : site?.about_title_en) || "Davit Abramishvili";
 
   useEffect(() => {
     if (slides.length < 2) return;
@@ -52,9 +56,9 @@ function About() {
       </div>
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          {t("about.title")}
+          {aboutKicker}
         </p>
-        <h1 className="serif mt-4 text-4xl md:text-5xl">Davit Abramishvili</h1>
+        <h1 className="serif mt-4 text-4xl md:text-5xl">{aboutTitle}</h1>
         <div className="mt-8 space-y-5 text-base leading-relaxed text-foreground/90">
           {bioParagraphs.map((p, i) => (
             <p key={i}>{p}</p>
