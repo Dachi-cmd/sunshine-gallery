@@ -223,7 +223,10 @@ function ArtworksAdmin({ onChange }: { onChange: () => void }) {
       </form>
 
       <div className="space-y-4">
-        {data?.map((a) =>
+        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+          Rank — lower numbers show first on the home page & gallery
+        </p>
+        {data?.map((a, idx) =>
           editingId === a.id ? (
             <EditArtwork
               key={a.id}
@@ -237,6 +240,25 @@ function ArtworksAdmin({ onChange }: { onChange: () => void }) {
             />
           ) : (
             <div key={a.id} className="flex gap-4 border-b border-border pb-4">
+              <div className="flex flex-col items-center justify-start gap-2 pt-1">
+                <span className="serif text-2xl leading-none text-muted-foreground">#{idx + 1}</span>
+                <RankInput
+                  value={a.sort_order}
+                  onSave={async (next) => {
+                    const { error } = await supabase
+                      .from("artworks")
+                      .update({ sort_order: next })
+                      .eq("id", a.id);
+                    if (error) {
+                      toast.error(error.message);
+                      return;
+                    }
+                    toast.success("Rank updated");
+                    void refetch();
+                    onChange();
+                  }}
+                />
+              </div>
               <img src={resolveImage(a.image_url)} alt={a.title} className="h-24 w-20 object-cover bg-muted" />
               <div className="flex-1">
                 <p className="serif text-lg">{a.title}</p>
@@ -787,6 +809,35 @@ function Textarea({ label, value, onChange }: { label: string; value: string; on
         className="mt-1.5 w-full border border-border bg-transparent p-2 text-sm outline-none focus:border-foreground"
       />
     </div>
+  );
+}
+
+function RankInput({ value, onSave }: { value: number; onSave: (next: number) => void | Promise<void> }) {
+  const [v, setV] = useState(String(value));
+  useEffect(() => setV(String(value)), [value]);
+  const commit = () => {
+    const n = Number(v);
+    if (!Number.isFinite(n) || n === value) {
+      setV(String(value));
+      return;
+    }
+    void onSave(n);
+  };
+  return (
+    <input
+      type="number"
+      value={v}
+      onChange={(e) => setV(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          (e.target as HTMLInputElement).blur();
+        }
+      }}
+      className="w-14 rounded border border-border bg-transparent px-1.5 py-0.5 text-center text-xs outline-none focus:border-foreground"
+      title="Rank (lower = shown first)"
+    />
   );
 }
 

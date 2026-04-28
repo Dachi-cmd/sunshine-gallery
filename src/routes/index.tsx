@@ -30,7 +30,7 @@ function Index() {
         .from("artworks")
         .select("*")
         .eq("published", true)
-        .order("created_at", { ascending: false })
+        .order("sort_order", { ascending: true })
         .limit(3);
       if (error) throw error;
       return data;
