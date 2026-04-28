@@ -10,6 +10,7 @@ import { AuthProvider } from "@/lib/auth";
 import { CartProvider } from "@/lib/cart";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ChatWidget } from "@/components/ChatWidget";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -98,6 +99,7 @@ function RootComponent() {
                 </main>
                 <SiteFooter />
               </div>
+              <ChatWidget />
               <Toaster />
             </CartProvider>
           </AuthProvider>
