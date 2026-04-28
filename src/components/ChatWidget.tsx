@@ -7,7 +7,7 @@ import { useChatSettings } from "@/lib/chatSettings";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const FALLBACK_QUESTIONS = {
+const FALLBACK_QUESTIONS: Record<"en" | "ka", string[]> = {
   en: ["How much does it cost?", "Where are you located?", "How can I purchase an artwork?", "Delivery", "Contact"],
   ka: ["რამდენი ღირს?", "სად მდებარეობთ?", "როგორ შევიძინო ნამუშევარი?", "მიწოდება", "კონტაქტი"],
 };
