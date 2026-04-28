@@ -639,6 +639,125 @@ function SettingsAdmin({ onChange }: { onChange: () => void }) {
   );
 }
 
+function ChatAdmin({ onChange }: { onChange: () => void }) {
+  const { data, refetch } = useQuery({
+    queryKey: ["admin-chat-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("key,value")
+        .in("key", ["chat_knowledge_en", "chat_knowledge_ka", "chat_qas"]);
+      if (error) throw error;
+      const map: Record<string, string | null> = {};
+      for (const r of data ?? []) map[r.key] = r.value;
+      let qas: ChatQA[] = [];
+      try {
+        qas = map.chat_qas ? (JSON.parse(map.chat_qas) as ChatQA[]) : [];
+      } catch {
+        qas = [];
+      }
+      return {
+        knowledge_en: map.chat_knowledge_en || "",
+        knowledge_ka: map.chat_knowledge_ka || "",
+        qas,
+      };
+    },
+  });
+
+  const [knowledgeEn, setKnowledgeEn] = useState("");
+  const [knowledgeKa, setKnowledgeKa] = useState("");
+  const [qas, setQas] = useState<ChatQA[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    if (data && !hydrated) {
+      setKnowledgeEn(data.knowledge_en);
+      setKnowledgeKa(data.knowledge_ka);
+      setQas(data.qas);
+      setHydrated(true);
+    }
+  }, [data, hydrated]);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const rows = [
+      { key: "chat_knowledge_en", value: knowledgeEn },
+      { key: "chat_knowledge_ka", value: knowledgeKa },
+      { key: "chat_qas", value: JSON.stringify(qas) },
+    ];
+    const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success("Chat settings saved");
+    void refetch();
+    onChange();
+  };
+
+  const updateQa = (i: number, patch: Partial<ChatQA>) => {
+    setQas((prev) => prev.map((q, idx) => (idx === i ? { ...q, ...patch } : q)));
+  };
+
+  return (
+    <form onSubmit={save} className="max-w-3xl space-y-8">
+      <div className="space-y-4 rounded border border-border bg-surface p-6">
+        <h2 className="serif text-xl">Assistant knowledge base</h2>
+        <p className="text-xs text-muted-foreground">
+          General facts the AI can use to answer anything. Write in plain sentences.
+        </p>
+        <Textarea label="Knowledge (EN)" value={knowledgeEn} onChange={setKnowledgeEn} />
+        <Textarea label="Knowledge (KA)" value={knowledgeKa} onChange={setKnowledgeKa} />
+      </div>
+
+      <div className="space-y-4 rounded border border-border bg-surface p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="serif text-xl">Quick questions & answers</h2>
+          <button
+            type="button"
+            onClick={() => setQas((p) => [...p, { q_en: "", q_ka: "", a_en: "", a_ka: "" }])}
+            className="text-xs uppercase tracking-[0.25em] hover:text-accent"
+          >
+            + Add
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          These appear as chips in the chat bubble. The AI will prefer the provided answers.
+        </p>
+        {qas.length === 0 && (
+          <p className="text-sm text-muted-foreground">No questions yet.</p>
+        )}
+        {qas.map((qa, i) => (
+          <div key={i} className="space-y-2 rounded border border-border p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-[0.25em] text-muted-foreground">#{i + 1}</span>
+              <button
+                type="button"
+                onClick={() => setQas((p) => p.filter((_, idx) => idx !== i))}
+                className="text-xs uppercase tracking-[0.25em] text-muted-foreground hover:text-destructive"
+              >
+                Remove
+              </button>
+            </div>
+            <Input label="Question (EN)" value={qa.q_en} onChange={(v) => updateQa(i, { q_en: v })} />
+            <Input label="Question (KA)" value={qa.q_ka} onChange={(v) => updateQa(i, { q_ka: v })} />
+            <Textarea label="Answer (EN)" value={qa.a_en} onChange={(v) => updateQa(i, { a_en: v })} />
+            <Textarea label="Answer (KA)" value={qa.a_ka} onChange={(v) => updateQa(i, { a_ka: v })} />
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="submit"
+        disabled={busy}
+        className="border-b border-foreground pb-1 text-xs uppercase tracking-[0.25em] hover:text-accent hover:border-accent disabled:opacity-50"
+      >
+        {busy ? "Saving…" : "Save chat settings →"}
+      </button>
+    </form>
+  );
+}
+
 function Input({
   label, value, onChange, type = "text", required, placeholder,
 }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean; placeholder?: string }) {
