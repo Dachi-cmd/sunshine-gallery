@@ -9,6 +9,16 @@ export type SiteSettings = {
   social_youtube: string;
   social_facebook: string;
   social_linkedin: string;
+  home_kicker_en: string;
+  home_kicker_ka: string;
+  home_title_en: string;
+  home_title_ka: string;
+  home_subtitle_en: string;
+  home_subtitle_ka: string;
+  about_kicker_en: string;
+  about_kicker_ka: string;
+  about_title_en: string;
+  about_title_ka: string;
 };
 
 export const SETTINGS_DEFAULTS: SiteSettings = {
@@ -19,6 +29,18 @@ export const SETTINGS_DEFAULTS: SiteSettings = {
   social_youtube: "https://youtube.com/",
   social_facebook: "https://facebook.com/",
   social_linkedin: "https://linkedin.com/",
+  home_kicker_en: "Selected works · 2018 — 2024",
+  home_kicker_ka: "რჩეული ნამუშევრები · 2018 — 2024",
+  home_title_en: "Paintings of stillness,\nweight, and light.",
+  home_title_ka: "მშვიდობის, სიმძიმის\nდა სინათლის მხატვრობა.",
+  home_subtitle_en:
+    "A studio practice rooted in oil and patience — figures, landscapes, and quiet still lifes made over slow seasons in Tbilisi.",
+  home_subtitle_ka:
+    "სტუდიური პრაქტიკა, დაფუძნებული ზეთზე და მოთმინებაზე — ფიგურები, პეიზაჟები და მშვიდი ნატურმორტები, შექმნილი ნელ სეზონებში თბილისში.",
+  about_kicker_en: "About the Artist",
+  about_kicker_ka: "მხატვრის შესახებ",
+  about_title_en: "Davit Abramishvili",
+  about_title_ka: "დავით აბრამიშვილი",
 };
 
 export function useSiteSettings() {

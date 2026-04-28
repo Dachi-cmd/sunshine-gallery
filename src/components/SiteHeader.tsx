@@ -4,8 +4,7 @@ import { useTheme } from "@/lib/theme";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
-import logoDark from "@/assets/logo-dark.webp";
-import logoLight from "@/assets/logo-light.png";
+import brandLogo from "@/assets/brand-logo-02.png";
 
 export function SiteHeader() {
   const { theme, toggle } = useTheme();
@@ -18,9 +17,9 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <Link to="/" className="flex items-center gap-2.5">
           <img
-            src={theme === "dark" ? logoLight : logoDark}
+            src={brandLogo}
             alt="Davit Abramishvili logo"
-            className="h-8 w-auto object-contain"
+            className={`h-8 w-auto object-contain ${theme === "dark" ? "invert" : ""}`}
           />
           <span className="serif text-xl tracking-tight">Davit Abramishvili</span>
         </Link>
