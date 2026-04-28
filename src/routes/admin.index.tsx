@@ -249,7 +249,10 @@ function ArtworksAdmin({ onChange }: { onChange: () => void }) {
                       .from("artworks")
                       .update({ sort_order: next })
                       .eq("id", a.id);
-                    if (error) return toast.error(error.message);
+                    if (error) {
+                      toast.error(error.message);
+                      return;
+                    }
                     toast.success("Rank updated");
                     void refetch();
                     onChange();
