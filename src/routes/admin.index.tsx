@@ -837,6 +837,8 @@ function RankInput({ value, onSave }: { value: number; onSave: (next: number) =>
     />
   );
 }
+
+function AnalyticsAdmin() {
   const visitsQ = useQuery({
     queryKey: ["admin-visits"],
     queryFn: async () => {
