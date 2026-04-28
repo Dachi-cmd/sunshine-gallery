@@ -223,7 +223,10 @@ function ArtworksAdmin({ onChange }: { onChange: () => void }) {
       </form>
 
       <div className="space-y-4">
-        {data?.map((a) =>
+        <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+          Rank — lower numbers show first on the home page & gallery
+        </p>
+        {data?.map((a, idx) =>
           editingId === a.id ? (
             <EditArtwork
               key={a.id}
@@ -237,6 +240,22 @@ function ArtworksAdmin({ onChange }: { onChange: () => void }) {
             />
           ) : (
             <div key={a.id} className="flex gap-4 border-b border-border pb-4">
+              <div className="flex flex-col items-center justify-start gap-2 pt-1">
+                <span className="serif text-2xl leading-none text-muted-foreground">#{idx + 1}</span>
+                <RankInput
+                  value={a.sort_order}
+                  onSave={async (next) => {
+                    const { error } = await supabase
+                      .from("artworks")
+                      .update({ sort_order: next })
+                      .eq("id", a.id);
+                    if (error) return toast.error(error.message);
+                    toast.success("Rank updated");
+                    void refetch();
+                    onChange();
+                  }}
+                />
+              </div>
               <img src={resolveImage(a.image_url)} alt={a.title} className="h-24 w-20 object-cover bg-muted" />
               <div className="flex-1">
                 <p className="serif text-lg">{a.title}</p>
