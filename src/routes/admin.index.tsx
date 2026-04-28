@@ -809,7 +809,34 @@ function Textarea({ label, value, onChange }: { label: string; value: string; on
   );
 }
 
-function AnalyticsAdmin() {
+function RankInput({ value, onSave }: { value: number; onSave: (next: number) => void | Promise<void> }) {
+  const [v, setV] = useState(String(value));
+  useEffect(() => setV(String(value)), [value]);
+  const commit = () => {
+    const n = Number(v);
+    if (!Number.isFinite(n) || n === value) {
+      setV(String(value));
+      return;
+    }
+    void onSave(n);
+  };
+  return (
+    <input
+      type="number"
+      value={v}
+      onChange={(e) => setV(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          (e.target as HTMLInputElement).blur();
+        }
+      }}
+      className="w-14 rounded border border-border bg-transparent px-1.5 py-0.5 text-center text-xs outline-none focus:border-foreground"
+      title="Rank (lower = shown first)"
+    />
+  );
+}
   const visitsQ = useQuery({
     queryKey: ["admin-visits"],
     queryFn: async () => {
