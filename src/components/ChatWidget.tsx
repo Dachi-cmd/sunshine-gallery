@@ -121,7 +121,11 @@ export function ChatWidget() {
     }
   }
 
-  const questions = QUICK_QUESTIONS[lang];
+  const { data: chatSettings } = useChatSettings();
+  const questions: string[] =
+    chatSettings?.chat_qas && chatSettings.chat_qas.length > 0
+      ? chatSettings.chat_qas.map((qa) => (lang === "ka" ? qa.q_ka : qa.q_en)).filter(Boolean)
+      : FALLBACK_QUESTIONS[lang];
 
   return (
     <>
