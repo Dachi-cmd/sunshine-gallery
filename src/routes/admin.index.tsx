@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { resolveImage } from "@/lib/assetMap";
 import { SETTINGS_DEFAULTS, type SiteSettings } from "@/lib/siteSettings";
 import { ABOUT_DEFAULTS, type AboutSettings, type Exhibition } from "@/lib/aboutSettings";
+import type { ChatQA } from "@/lib/chatSettings";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
