@@ -3,24 +3,13 @@ import { MessageCircle, X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
+import { useChatSettings } from "@/lib/chatSettings";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const QUICK_QUESTIONS = {
-  en: [
-    "How much does it cost?",
-    "Where are you located?",
-    "How can I purchase an artwork?",
-    "Delivery",
-    "Contact",
-  ],
-  ka: [
-    "რამდენი ღირს?",
-    "სად მდებარეობთ?",
-    "როგორ შევიძინო ნამუშევარი?",
-    "მიწოდება",
-    "კონტაქტი",
-  ],
+const FALLBACK_QUESTIONS = {
+  en: ["How much does it cost?", "Where are you located?", "How can I purchase an artwork?", "Delivery", "Contact"],
+  ka: ["რამდენი ღირს?", "სად მდებარეობთ?", "როგორ შევიძინო ნამუშევარი?", "მიწოდება", "კონტაქტი"],
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
