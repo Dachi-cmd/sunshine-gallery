@@ -18,7 +18,7 @@ export const Route = createFileRoute("/admin/")({
   component: AdminPage,
 });
 
-type TabKey = "artworks" | "products" | "about" | "settings" | "analytics";
+type TabKey = "artworks" | "products" | "about" | "chat" | "settings" | "analytics";
 
 function AdminPage() {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -69,7 +69,7 @@ function AdminPage() {
       </header>
 
       <div className="mb-8 flex gap-6 border-b border-border">
-        {(["artworks", "products", "about", "settings", "analytics"] as const).map((k) => (
+        {(["artworks", "products", "about", "chat", "settings", "analytics"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
@@ -85,6 +85,7 @@ function AdminPage() {
       {tab === "artworks" && <ArtworksAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "products" && <ProductsAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "about" && <AboutAdmin onChange={() => qc.invalidateQueries()} />}
+      {tab === "chat" && <ChatAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "settings" && <SettingsAdmin onChange={() => qc.invalidateQueries()} />}
       {tab === "analytics" && <AnalyticsAdmin />}
 
@@ -564,6 +565,16 @@ const SETTINGS_FIELDS: { key: keyof SiteSettings; label: string; type?: string; 
   { key: "social_youtube", label: "YouTube URL" },
   { key: "social_facebook", label: "Facebook URL" },
   { key: "social_linkedin", label: "LinkedIn URL" },
+  { key: "home_kicker_en", label: "Home — kicker (EN)" },
+  { key: "home_kicker_ka", label: "Home — kicker (KA)" },
+  { key: "home_title_en", label: "Home — title (EN) — use line breaks" },
+  { key: "home_title_ka", label: "Home — title (KA) — use line breaks" },
+  { key: "home_subtitle_en", label: "Home — subtitle (EN)" },
+  { key: "home_subtitle_ka", label: "Home — subtitle (KA)" },
+  { key: "about_kicker_en", label: "About — kicker (EN)" },
+  { key: "about_kicker_ka", label: "About — kicker (KA)" },
+  { key: "about_title_en", label: "About — title (EN)" },
+  { key: "about_title_ka", label: "About — title (KA)" },
 ];
 
 function SettingsAdmin({ onChange }: { onChange: () => void }) {
