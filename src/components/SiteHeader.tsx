@@ -19,7 +19,7 @@ export function SiteHeader() {
           <img
             src={brandLogo}
             alt="Davit Abramishvili logo"
-            className={`h-8 w-auto object-contain ${theme === "light" ? "invert" : ""}`}
+            className="h-8 w-auto object-contain invert dark:invert-0"
           />
           <span className="serif text-xl tracking-tight">Davit Abramishvili</span>
         </Link>
