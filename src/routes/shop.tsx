@@ -186,6 +186,7 @@ function ProductDialog({
   lang: "en" | "ka";
   t: (k: string) => string;
 }) {
+  const { addProductToCart } = useCart();
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [current, setCurrent] = useState(startIndex);
 
