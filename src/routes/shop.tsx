@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
 import { formatPrice } from "@/lib/siteSettings";
+import { useCart } from "@/lib/cart";
+import { ShoppingBag } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   Carousel,
