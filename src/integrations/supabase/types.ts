@@ -67,28 +67,25 @@ export type Database = {
       }
       cart_items: {
         Row: {
-          artwork_id: string | null
+          artwork_id: string
           created_at: string
           id: string
-          product_id: string | null
           quantity: number
           updated_at: string
           user_id: string
         }
         Insert: {
-          artwork_id?: string | null
+          artwork_id: string
           created_at?: string
           id?: string
-          product_id?: string | null
           quantity?: number
           updated_at?: string
           user_id: string
         }
         Update: {
-          artwork_id?: string | null
+          artwork_id?: string
           created_at?: string
           id?: string
-          product_id?: string | null
           quantity?: number
           updated_at?: string
           user_id?: string

@@ -5,8 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
 import { formatPrice } from "@/lib/siteSettings";
-import { useCart } from "@/lib/cart";
-import { ShoppingBag } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   Carousel,
@@ -54,7 +52,6 @@ type Product = {
 
 function Shop() {
   const { lang, t } = useI18n();
-  const { addProductToCart } = useCart();
   const [category, setCategory] = useState<string>("all");
   const [openProductId, setOpenProductId] = useState<string | null>(null);
   const { data, isLoading } = useQuery({
@@ -140,13 +137,14 @@ function Shop() {
               <div className="text-right">
                 <p className="serif text-xl">{formatPrice(p.price_cents, p.currency, lang)}</p>
                 {p.in_stock ? (
-                  <button
-                    type="button"
-                    onClick={() => void addProductToCart(p.id)}
-                    className="mt-3 inline-flex items-center gap-2 bg-foreground px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-background transition hover:bg-accent"
+                  <a
+                    href={`mailto:abramishvilidaviti@yahoo.com?subject=${encodeURIComponent(
+                      `Inquiry: ${p.name}`,
+                    )}`}
+                    className="mt-2 inline-block border-b border-foreground pb-0.5 text-[11px] uppercase tracking-[0.25em] hover:text-accent hover:border-accent"
                   >
-                    <ShoppingBag size={12} /> Add to cart
-                  </button>
+                    {t("shop.buy")}
+                  </a>
                 ) : (
                   <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
                     {t("shop.outOfStock")}
@@ -186,7 +184,6 @@ function ProductDialog({
   lang: "en" | "ka";
   t: (k: string) => string;
 }) {
-  const { addProductToCart } = useCart();
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [current, setCurrent] = useState(startIndex);
 
@@ -249,13 +246,14 @@ function ProductDialog({
           <div className="text-right">
             <p className="serif text-xl">{formatPrice(active.price_cents, active.currency, lang)}</p>
             {active.in_stock ? (
-              <button
-                type="button"
-                onClick={() => void addProductToCart(active.id)}
-                className="mt-3 inline-flex items-center gap-2 bg-foreground px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-background transition hover:bg-accent"
+              <a
+                href={`mailto:abramishvilidaviti@yahoo.com?subject=${encodeURIComponent(
+                  `Inquiry: ${active.name}`,
+                )}`}
+                className="mt-2 inline-block border-b border-foreground pb-0.5 text-[11px] uppercase tracking-[0.25em] hover:text-accent hover:border-accent"
               >
-                <ShoppingBag size={12} /> Add to cart
-              </button>
+                {t("shop.buy")}
+              </a>
             ) : (
               <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
                 {t("shop.outOfStock")}
