@@ -4,6 +4,7 @@ import { useCart, buildWhatsappLink } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
+import { formatPrice } from "@/lib/siteSettings";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -37,11 +38,25 @@ function CartPage() {
     );
   }
 
+  const itemTitle = (i: typeof items[number]) => {
+    if (i.artwork) return pickLocalized(i.artwork, "title", lang);
+    if (i.product) return pickLocalized(i.product, "name", lang);
+    return "—";
+  };
+  const itemImage = (i: typeof items[number]) =>
+    i.artwork?.image_url ?? i.product?.image_url ?? "";
+  const itemMeta = (i: typeof items[number]) => {
+    if (i.artwork) return [i.artwork.medium, i.artwork.year].filter(Boolean).join(" · ");
+    if (i.product) return i.product.category ?? "";
+    return "";
+  };
+
   const checkoutMessage = () => {
-    const lines = items.map(
-      (i, n) => `${n + 1}. ${pickLocalized(i.artwork, "title", lang)}${i.artwork.year ? ` (${i.artwork.year})` : ""}`,
-    );
-    return `Hi! I'd like to inquire about these artworks:\n\n${lines.join("\n")}`;
+    const lines = items.map((i, n) => {
+      const year = i.artwork?.year ? ` (${i.artwork.year})` : "";
+      return `${n + 1}. ${itemTitle(i)}${year}`;
+    });
+    return `Hi! I'd like to inquire about these items:\n\n${lines.join("\n")}`;
   };
 
   return (
@@ -71,16 +86,21 @@ function CartPage() {
               <li key={item.id} className="flex items-center gap-5 py-5">
                 <div className="h-20 w-20 overflow-hidden bg-muted">
                   <img
-                    src={resolveImage(item.artwork.image_url)}
-                    alt={pickLocalized(item.artwork, "title", lang)}
+                    src={resolveImage(itemImage(item))}
+                    alt={itemTitle(item)}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 <div className="flex-1">
-                  <p className="serif text-lg">{pickLocalized(item.artwork, "title", lang)}</p>
+                  <p className="serif text-lg">{itemTitle(item)}</p>
                   <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {[item.artwork.medium, item.artwork.year].filter(Boolean).join(" · ")}
+                    {itemMeta(item)}
                   </p>
+                  {item.product && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {formatPrice(item.product.price_cents, item.product.currency, lang)}
+                    </p>
+                  )}
                 </div>
                 <button
                   type="button"
