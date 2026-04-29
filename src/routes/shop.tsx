@@ -249,14 +249,13 @@ function ProductDialog({
           <div className="text-right">
             <p className="serif text-xl">{formatPrice(active.price_cents, active.currency, lang)}</p>
             {active.in_stock ? (
-              <a
-                href={`mailto:abramishvilidaviti@yahoo.com?subject=${encodeURIComponent(
-                  `Inquiry: ${active.name}`,
-                )}`}
-                className="mt-2 inline-block border-b border-foreground pb-0.5 text-[11px] uppercase tracking-[0.25em] hover:text-accent hover:border-accent"
+              <button
+                type="button"
+                onClick={() => void addProductToCart(active.id)}
+                className="mt-3 inline-flex items-center gap-2 bg-foreground px-4 py-2 text-[11px] uppercase tracking-[0.25em] text-background transition hover:bg-accent"
               >
-                {t("shop.buy")}
-              </a>
+                <ShoppingBag size={12} /> Add to cart
+              </button>
             ) : (
               <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
                 {t("shop.outOfStock")}
