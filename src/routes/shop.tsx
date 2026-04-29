@@ -54,6 +54,7 @@ type Product = {
 
 function Shop() {
   const { lang, t } = useI18n();
+  const { addProductToCart } = useCart();
   const [category, setCategory] = useState<string>("all");
   const [openProductId, setOpenProductId] = useState<string | null>(null);
   const { data, isLoading } = useQuery({
