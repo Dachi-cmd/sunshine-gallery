@@ -26,11 +26,11 @@ const defaultStudio = [studio1, studio2, studio3, studio4];
 
 function About() {
   const { t, lang } = useI18n();
-  const { data: settings } = useAboutSettings();
+  const { data: settings, isLoading } = useAboutSettings();
   const { data: site } = useSiteSettings();
   const [slide, setSlide] = useState(0);
 
-  const portraitSrc = settings?.about_portrait_url || portrait;
+  const portraitSrc = !isLoading ? settings?.about_portrait_url || portrait : null;
   const videoSrc = settings?.about_video_url || studioVideo.url;
   const slides = (settings?.about_studio_images?.length ? settings.about_studio_images : defaultStudio) as string[];
   const exhibitions = settings?.about_exhibitions ?? [];
@@ -48,11 +48,15 @@ function About() {
   return (
     <section className="mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 py-20 md:grid-cols-2 md:py-28">
       <div className="aspect-[4/5] overflow-hidden bg-muted">
-        <img
-          src={portraitSrc}
-          alt="Portrait of the artist"
-          className="h-full w-full object-cover grayscale"
-        />
+        {portraitSrc ? (
+          <img
+            src={portraitSrc}
+            alt="Portrait of the artist"
+            className="h-full w-full object-cover grayscale"
+          />
+        ) : (
+          <div aria-hidden="true" className="h-full w-full bg-muted" />
+        )}
       </div>
       <div>
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
