@@ -67,25 +67,28 @@ export type Database = {
       }
       cart_items: {
         Row: {
-          artwork_id: string
+          artwork_id: string | null
           created_at: string
           id: string
+          product_id: string | null
           quantity: number
           updated_at: string
           user_id: string
         }
         Insert: {
-          artwork_id: string
+          artwork_id?: string | null
           created_at?: string
           id?: string
+          product_id?: string | null
           quantity?: number
           updated_at?: string
           user_id: string
         }
         Update: {
-          artwork_id?: string
+          artwork_id?: string | null
           created_at?: string
           id?: string
+          product_id?: string | null
           quantity?: number
           updated_at?: string
           user_id?: string
@@ -96,6 +99,13 @@ export type Database = {
             columns: ["artwork_id"]
             isOneToOne: false
             referencedRelation: "artworks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]

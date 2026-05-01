@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trash2, MessageCircle } from "lucide-react";
-import { useCart, buildWhatsappLink } from "@/lib/cart";
+import { useCart, buildWhatsappLink, type CartItem } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
+import { formatPrice } from "@/lib/siteSettings";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -14,6 +15,28 @@ export const Route = createFileRoute("/cart")({
   }),
   component: CartPage,
 });
+
+function getDisplay(item: CartItem, lang: "en" | "ka") {
+  if (item.artwork) {
+    return {
+      title: pickLocalized(item.artwork, "title", lang),
+      image: item.artwork.image_url,
+      meta: [item.artwork.medium, item.artwork.year].filter(Boolean).join(" · "),
+      price: null as string | null,
+      year: item.artwork.year,
+    };
+  }
+  if (item.product) {
+    return {
+      title: pickLocalized(item.product, "name", lang),
+      image: item.product.image_url,
+      meta: "",
+      price: formatPrice(item.product.price_cents, item.product.currency, lang),
+      year: null as number | null,
+    };
+  }
+  return { title: "Item", image: "", meta: "", price: null, year: null };
+}
 
 function CartPage() {
   const { user, loading } = useAuth();
@@ -38,10 +61,11 @@ function CartPage() {
   }
 
   const checkoutMessage = () => {
-    const lines = items.map(
-      (i, n) => `${n + 1}. ${pickLocalized(i.artwork, "title", lang)}${i.artwork.year ? ` (${i.artwork.year})` : ""}`,
-    );
-    return `Hi! I'd like to inquire about these artworks:\n\n${lines.join("\n")}`;
+    const lines = items.map((i, n) => {
+      const d = getDisplay(i, lang);
+      return `${n + 1}. ${d.title}${d.year ? ` (${d.year})` : ""}`;
+    });
+    return `Hi! I'd like to inquire about these items:\n\n${lines.join("\n")}`;
   };
 
   return (
@@ -67,31 +91,41 @@ function CartPage() {
       ) : (
         <>
           <ul className="divide-y divide-border border-y border-border">
-            {items.map((item) => (
-              <li key={item.id} className="flex items-center gap-5 py-5">
-                <div className="h-20 w-20 overflow-hidden bg-muted">
-                  <img
-                    src={resolveImage(item.artwork.image_url)}
-                    alt={pickLocalized(item.artwork, "title", lang)}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="serif text-lg">{pickLocalized(item.artwork, "title", lang)}</p>
-                  <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {[item.artwork.medium, item.artwork.year].filter(Boolean).join(" · ")}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeFromCart(item.id)}
-                  className="grid h-9 w-9 place-items-center text-muted-foreground transition hover:text-foreground"
-                  aria-label="Remove"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </li>
-            ))}
+            {items.map((item) => {
+              const d = getDisplay(item, lang);
+              return (
+                <li key={item.id} className="flex items-center gap-5 py-5">
+                  <div className="h-20 w-20 overflow-hidden bg-muted">
+                    {d.image && (
+                      <img
+                        src={resolveImage(d.image)}
+                        alt={d.title}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="serif text-lg">{d.title}</p>
+                    {d.meta && (
+                      <p className="mt-0.5 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                        {d.meta}
+                      </p>
+                    )}
+                    {d.price && (
+                      <p className="mt-0.5 text-sm text-muted-foreground">{d.price}</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFromCart(item.id)}
+                    className="grid h-9 w-9 place-items-center text-muted-foreground transition hover:text-foreground"
+                    aria-label="Remove"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-between">

@@ -5,7 +5,8 @@ import { toast } from "sonner";
 
 export type CartItem = {
   id: string;
-  artwork_id: string;
+  artwork_id: string | null;
+  product_id: string | null;
   quantity: number;
   artwork: {
     id: string;
@@ -14,7 +15,15 @@ export type CartItem = {
     image_url: string;
     medium: string | null;
     year: number | null;
-  };
+  } | null;
+  product: {
+    id: string;
+    name: string;
+    name_ka: string | null;
+    image_url: string;
+    price_cents: number;
+    currency: string;
+  } | null;
 };
 
 type CartCtx = {
@@ -22,6 +31,7 @@ type CartCtx = {
   count: number;
   loading: boolean;
   addToCart: (artworkId: string) => Promise<void>;
+  addProductToCart: (productId: string) => Promise<void>;
   removeFromCart: (id: string) => Promise<void>;
   clearCart: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -42,7 +52,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     const { data, error } = await supabase
       .from("cart_items")
-      .select("id, artwork_id, quantity, artwork:artworks(id, title, title_ka, image_url, medium, year)")
+      .select(
+        "id, artwork_id, product_id, quantity, artwork:artworks(id, title, title_ka, image_url, medium, year), product:products(id, name, name_ka, image_url, price_cents, currency)",
+      )
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) {
@@ -76,6 +88,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     await refresh();
   };
 
+  const addProductToCart = async (productId: string) => {
+    if (!user) {
+      toast.error("Please sign in to add to cart");
+      return;
+    }
+    const { error } = await supabase
+      .from("cart_items")
+      .insert({ user_id: user.id, product_id: productId, quantity: 1 });
+    if (error) {
+      if (error.code === "23505") {
+        toast.info("Already in your cart");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
+    toast.success("Added to cart");
+    await refresh();
+  };
+
   const removeFromCart = async (id: string) => {
     const { error } = await supabase.from("cart_items").delete().eq("id", id);
     if (error) {
@@ -97,7 +129,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <Ctx.Provider
-      value={{ items, count: items.length, loading, addToCart, removeFromCart, clearCart, refresh }}
+      value={{ items, count: items.length, loading, addToCart, addProductToCart, removeFromCart, clearCart, refresh }}
     >
       {children}
     </Ctx.Provider>
