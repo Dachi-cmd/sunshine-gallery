@@ -360,6 +360,7 @@ type ProductRow = {
   description: string | null;
   description_ka: string | null;
   image_url: string;
+  images: string[] | null;
   price_cents: number;
   currency: string;
   category: string;
@@ -386,17 +387,19 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
 
   const [form, setForm] = useState({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "", category: "t-shirts" });
   const [file, setFile] = useState<File | null>(null);
+  const [extraFiles, setExtraFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return toast.error("Pick an image");
+    if (!file) return toast.error("Pick a main image");
     const priceNum = Number(form.price);
     if (!Number.isFinite(priceNum) || priceNum < 0) return toast.error("Invalid price");
     setBusy(true);
     try {
       const image_url = await uploadImage(file);
+      const images = await Promise.all(extraFiles.map((f) => uploadImage(f)));
       const { error } = await supabase.from("products").insert({
         name: form.name,
         name_ka: form.name_ka || null,
@@ -405,6 +408,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
         description: form.description || null,
         description_ka: form.description_ka || null,
         image_url,
+        images,
         category: form.category,
         sort_order: (data?.length ?? 0) + 1,
       });
@@ -412,6 +416,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
       toast.success("Product added");
       setForm({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "", category: "t-shirts" });
       setFile(null);
+      setExtraFiles([]);
       void refetch();
       onChange();
     } catch (err: unknown) {
@@ -454,7 +459,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
         <Textarea label="Description (EN)" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
         <Textarea label="Description (KA)" value={form.description_ka} onChange={(v) => setForm({ ...form, description_ka: v })} />
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Image</label>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Main image</label>
           <input
             type="file"
             accept="image/*"
@@ -462,6 +467,21 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
             className="mt-2 block w-full text-sm"
             required
           />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Extra images (optional, multiple)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => setExtraFiles(e.target.files ? Array.from(e.target.files) : [])}
+            className="mt-2 block w-full text-sm"
+          />
+          {extraFiles.length > 0 && (
+            <p className="mt-1 text-[11px] text-muted-foreground">{extraFiles.length} file(s) selected</p>
+          )}
         </div>
         <button
           type="submit"
@@ -516,6 +536,8 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
     description_ka: product.description_ka ?? "",
     category: product.category ?? "other",
   });
+  const [images, setImages] = useState<string[]>(product.images ?? []);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
 
   const save = async (e: React.FormEvent) => {
@@ -523,22 +545,30 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
     const priceNum = Number(form.price);
     if (!Number.isFinite(priceNum) || priceNum < 0) return toast.error("Invalid price");
     setBusy(true);
-    const { error } = await supabase
-      .from("products")
-      .update({
-        name: form.name,
-        name_ka: form.name_ka || null,
-        price_cents: Math.round(priceNum * 100),
-        currency: form.currency,
-        description: form.description || null,
-        description_ka: form.description_ka || null,
-        category: form.category,
-      })
-      .eq("id", product.id);
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Saved");
-    onSaved();
+    try {
+      const uploaded = await Promise.all(newFiles.map((f) => uploadImage(f)));
+      const finalImages = [...images, ...uploaded];
+      const { error } = await supabase
+        .from("products")
+        .update({
+          name: form.name,
+          name_ka: form.name_ka || null,
+          price_cents: Math.round(priceNum * 100),
+          currency: form.currency,
+          description: form.description || null,
+          description_ka: form.description_ka || null,
+          category: form.category,
+          images: finalImages,
+        })
+        .eq("id", product.id);
+      if (error) throw error;
+      toast.success("Saved");
+      onSaved();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -568,6 +598,38 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
       </div>
       <Textarea label="Description (EN)" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
       <Textarea label="Description (KA)" value={form.description_ka} onChange={(v) => setForm({ ...form, description_ka: v })} />
+
+      <div>
+        <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Extra images</label>
+        {images.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {images.map((url, idx) => (
+              <div key={url + idx} className="relative">
+                <img src={resolveImage(url)} alt="" className="h-16 w-16 object-cover bg-muted" />
+                <button
+                  type="button"
+                  onClick={() => setImages(images.filter((_, i) => i !== idx))}
+                  className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-foreground text-background text-xs"
+                  aria-label="Remove image"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => setNewFiles(e.target.files ? Array.from(e.target.files) : [])}
+          className="mt-2 block w-full text-sm"
+        />
+        {newFiles.length > 0 && (
+          <p className="mt-1 text-[11px] text-muted-foreground">{newFiles.length} new file(s) to upload on save</p>
+        )}
+      </div>
+
       <div className="flex gap-4 pt-2">
         <button type="submit" disabled={busy} className="border-b border-foreground pb-1 text-xs uppercase tracking-[0.25em] hover:text-accent hover:border-accent disabled:opacity-50">
           {busy ? "Saving…" : "Save changes"}
