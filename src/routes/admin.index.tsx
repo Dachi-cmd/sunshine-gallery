@@ -459,7 +459,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
         <Textarea label="Description (EN)" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
         <Textarea label="Description (KA)" value={form.description_ka} onChange={(v) => setForm({ ...form, description_ka: v })} />
         <div>
-          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Image</label>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Main image</label>
           <input
             type="file"
             accept="image/*"
@@ -467,6 +467,21 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
             className="mt-2 block w-full text-sm"
             required
           />
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Extra images (optional, multiple)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => setExtraFiles(e.target.files ? Array.from(e.target.files) : [])}
+            className="mt-2 block w-full text-sm"
+          />
+          {extraFiles.length > 0 && (
+            <p className="mt-1 text-[11px] text-muted-foreground">{extraFiles.length} file(s) selected</p>
+          )}
         </div>
         <button
           type="submit"
