@@ -536,6 +536,8 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
     description_ka: product.description_ka ?? "",
     category: product.category ?? "other",
   });
+  const [images, setImages] = useState<string[]>(product.images ?? []);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
 
   const save = async (e: React.FormEvent) => {
@@ -543,22 +545,30 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
     const priceNum = Number(form.price);
     if (!Number.isFinite(priceNum) || priceNum < 0) return toast.error("Invalid price");
     setBusy(true);
-    const { error } = await supabase
-      .from("products")
-      .update({
-        name: form.name,
-        name_ka: form.name_ka || null,
-        price_cents: Math.round(priceNum * 100),
-        currency: form.currency,
-        description: form.description || null,
-        description_ka: form.description_ka || null,
-        category: form.category,
-      })
-      .eq("id", product.id);
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Saved");
-    onSaved();
+    try {
+      const uploaded = await Promise.all(newFiles.map((f) => uploadImage(f)));
+      const finalImages = [...images, ...uploaded];
+      const { error } = await supabase
+        .from("products")
+        .update({
+          name: form.name,
+          name_ka: form.name_ka || null,
+          price_cents: Math.round(priceNum * 100),
+          currency: form.currency,
+          description: form.description || null,
+          description_ka: form.description_ka || null,
+          category: form.category,
+          images: finalImages,
+        })
+        .eq("id", product.id);
+      if (error) throw error;
+      toast.success("Saved");
+      onSaved();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -588,6 +598,38 @@ function EditProduct({ product, onCancel, onSaved }: { product: ProductRow; onCa
       </div>
       <Textarea label="Description (EN)" value={form.description} onChange={(v) => setForm({ ...form, description: v })} />
       <Textarea label="Description (KA)" value={form.description_ka} onChange={(v) => setForm({ ...form, description_ka: v })} />
+
+      <div>
+        <label className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Extra images</label>
+        {images.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {images.map((url, idx) => (
+              <div key={url + idx} className="relative">
+                <img src={resolveImage(url)} alt="" className="h-16 w-16 object-cover bg-muted" />
+                <button
+                  type="button"
+                  onClick={() => setImages(images.filter((_, i) => i !== idx))}
+                  className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-foreground text-background text-xs"
+                  aria-label="Remove image"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => setNewFiles(e.target.files ? Array.from(e.target.files) : [])}
+          className="mt-2 block w-full text-sm"
+        />
+        {newFiles.length > 0 && (
+          <p className="mt-1 text-[11px] text-muted-foreground">{newFiles.length} new file(s) to upload on save</p>
+        )}
+      </div>
+
       <div className="flex gap-4 pt-2">
         <button type="submit" disabled={busy} className="border-b border-foreground pb-1 text-xs uppercase tracking-[0.25em] hover:text-accent hover:border-accent disabled:opacity-50">
           {busy ? "Saving…" : "Save changes"}
