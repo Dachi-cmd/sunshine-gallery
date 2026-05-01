@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, pickLocalized } from "@/lib/i18n";
 import { resolveImage } from "@/lib/assetMap";
 import { formatPrice } from "@/lib/siteSettings";
 import { useCart } from "@/lib/cart";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const CATEGORIES = [
   { value: "all", label: "All" },
@@ -35,6 +35,8 @@ function Shop() {
   const { lang, t } = useI18n();
   const { addProductToCart } = useCart();
   const [category, setCategory] = useState<string>("all");
+  const [lightbox, setLightbox] = useState<number | null>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
@@ -49,6 +51,17 @@ function Shop() {
   });
 
   const filtered = (data ?? []).filter((p) => category === "all" || (p.category ?? "other") === category);
+
+  useEffect(() => {
+    if (lightbox === null) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowRight") setLightbox((i) => (i === null ? null : (i + 1) % filtered.length));
+      if (e.key === "ArrowLeft") setLightbox((i) => (i === null ? null : (i - 1 + filtered.length) % filtered.length));
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lightbox, filtered.length]);
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-20 md:py-28">
@@ -77,16 +90,21 @@ function Shop() {
       )}
 
       <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-        {filtered.map((p) => (
+        {filtered.map((p, i) => (
           <article key={p.id} className="group">
-            <div className="aspect-square overflow-hidden bg-muted">
+            <button
+              type="button"
+              onClick={() => setLightbox(i)}
+              className="block aspect-square w-full overflow-hidden bg-muted"
+              aria-label={pickLocalized(p, "name", lang)}
+            >
               <img
                 src={resolveImage(p.image_url)}
                 alt={pickLocalized(p, "name", lang)}
                 loading="lazy"
                 className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
               />
-            </div>
+            </button>
             <div className="mt-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="serif text-2xl">{pickLocalized(p, "name", lang)}</h2>
@@ -114,6 +132,102 @@ function Shop() {
           </article>
         ))}
       </div>
+
+      {/* Lightbox */}
+      {lightbox !== null && filtered[lightbox] && (() => {
+        const p = filtered[lightbox];
+        const desc = pickLocalized(p, "description", lang) as string | null;
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-3 sm:p-6 backdrop-blur-sm"
+            onClick={() => setLightbox(null)}
+          >
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setLightbox(null); }}
+              className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              aria-label="Close"
+            >
+              <X size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((i) => (i === null ? null : (i - 1 + filtered.length) % filtered.length));
+              }}
+              className="absolute left-2 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              aria-label="Previous"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((i) => (i === null ? null : (i + 1) % filtered.length));
+              }}
+              className="absolute right-2 top-1/2 z-10 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              aria-label="Next"
+            >
+              <ChevronRight size={18} />
+            </button>
+
+            <div
+              className="flex h-full max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-sm bg-black shadow-2xl md:flex-row"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex flex-1 items-center justify-center bg-black p-4 md:p-6 min-h-0">
+                <img
+                  src={resolveImage(p.image_url)}
+                  alt={pickLocalized(p, "name", lang)}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+
+              <aside className="flex w-full shrink-0 flex-col bg-black text-white md:w-[340px] md:border-l md:border-white/10">
+                <div className="flex-1 overflow-y-auto px-6 py-6 md:px-7 md:py-8">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-white/40">
+                    {lightbox + 1} / {filtered.length}
+                  </p>
+                  <h2 className="serif mt-3 text-2xl leading-tight md:text-3xl">
+                    {pickLocalized(p, "name", lang)}
+                  </h2>
+                  {formatPrice(p.price_cents, p.currency, lang) && (
+                    <p className="serif mt-4 text-xl text-white">
+                      {formatPrice(p.price_cents, p.currency, lang)}
+                    </p>
+                  )}
+                  {desc && (
+                    <div className="mt-5 border-t border-white/10 pt-4">
+                      <p className="text-[10px] uppercase tracking-[0.25em] text-white/40">
+                        {lang === "en" ? "Description" : "აღწერა"}
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-white/80">{desc}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2 border-t border-white/10 bg-black px-5 py-4 md:px-7 md:py-5">
+                  {p.in_stock ? (
+                    <button
+                      type="button"
+                      onClick={() => void addProductToCart(p.id)}
+                      className="inline-flex w-full items-center justify-center gap-1.5 bg-white px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-black transition hover:bg-white/90"
+                    >
+                      <ShoppingBag size={12} /> {t("shop.addToCart") || "Add to cart"}
+                    </button>
+                  ) : (
+                    <p className="text-center text-[10px] uppercase tracking-[0.2em] text-white/50">
+                      {t("shop.outOfStock")}
+                    </p>
+                  )}
+                </div>
+              </aside>
+            </div>
+          </div>
+        );
+      })()}
     </section>
   );
 }
