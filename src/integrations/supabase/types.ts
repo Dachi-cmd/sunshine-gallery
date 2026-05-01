@@ -119,6 +119,7 @@ export type Database = {
           description_ka: string | null
           id: string
           image_url: string
+          images: string[]
           in_stock: boolean
           name: string
           name_ka: string | null
@@ -135,6 +136,7 @@ export type Database = {
           description_ka?: string | null
           id?: string
           image_url: string
+          images?: string[]
           in_stock?: boolean
           name: string
           name_ka?: string | null
@@ -151,6 +153,7 @@ export type Database = {
           description_ka?: string | null
           id?: string
           image_url?: string
+          images?: string[]
           in_stock?: boolean
           name?: string
           name_ka?: string | null
