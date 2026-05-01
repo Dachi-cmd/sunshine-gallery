@@ -360,6 +360,7 @@ type ProductRow = {
   description: string | null;
   description_ka: string | null;
   image_url: string;
+  images: string[] | null;
   price_cents: number;
   currency: string;
   category: string;
@@ -386,17 +387,19 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
 
   const [form, setForm] = useState({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "", category: "t-shirts" });
   const [file, setFile] = useState<File | null>(null);
+  const [extraFiles, setExtraFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return toast.error("Pick an image");
+    if (!file) return toast.error("Pick a main image");
     const priceNum = Number(form.price);
     if (!Number.isFinite(priceNum) || priceNum < 0) return toast.error("Invalid price");
     setBusy(true);
     try {
       const image_url = await uploadImage(file);
+      const images = await Promise.all(extraFiles.map((f) => uploadImage(f)));
       const { error } = await supabase.from("products").insert({
         name: form.name,
         name_ka: form.name_ka || null,
@@ -405,6 +408,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
         description: form.description || null,
         description_ka: form.description_ka || null,
         image_url,
+        images,
         category: form.category,
         sort_order: (data?.length ?? 0) + 1,
       });
@@ -412,6 +416,7 @@ function ProductsAdmin({ onChange }: { onChange: () => void }) {
       toast.success("Product added");
       setForm({ name: "", name_ka: "", price: "", currency: "USD", description: "", description_ka: "", category: "t-shirts" });
       setFile(null);
+      setExtraFiles([]);
       void refetch();
       onChange();
     } catch (err: unknown) {
